@@ -1,0 +1,13 @@
+# 密碼和連接埠寫在同一資料夾的 .env 檔裡（參考 .env.example）
+services:
+  drone-practice:
+    build: .
+    container_name: drone-practice
+    restart: unless-stopped
+    environment:
+      - ADMIN_PIN=${ADMIN_PIN:?請先建立 .env 並設定 ADMIN_PIN}
+      - TZ=Asia/Taipei
+    volumes:
+      - ./data:/data          # 資料庫存在這裡，記得納入 NAS 備份
+    ports:
+      - "${PORT:-8080}:8080"  # 校內可用 http://NAS的IP:PORT 連線

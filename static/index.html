@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>無人機足球 練習紀錄</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%2313203a'/%3E%3Cg fill='none' stroke='%23ffb13b' stroke-width='3'%3E%3Ccircle cx='11' cy='11' r='5'/%3E%3Ccircle cx='29' cy='11' r='5'/%3E%3Ccircle cx='11' cy='29' r='5'/%3E%3Ccircle cx='29' cy='29' r='5'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='4' fill='%23fff'/%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- 若學校網路擋 CDN，把 chart.umd.min.js 下載放在同一個資料夾即可自動改用本機檔案 -->
+<script>window.Chart || document.write('<script src="chart.umd.min.js"><\/script>')</script>
+<style>
+:root{
+  --bg:#f3f5f9; --card:#ffffff; --ink:#0f1a2e; --ink2:#4a5468; --muted:#8a93a5; --line:#e3e7ee;
+  --navy:#13203a; --navy2:#1d2f52;
+  --attack:#eb6834; --chase:#1baf7a; --keeper:#6250d6;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --good:#0a8a3a; --bad:#c62828;
+  --r:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);font-size:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+header{background:var(--navy);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.head-in{max-width:1100px;margin:0 auto;padding:12px 16px 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:19px;letter-spacing:.5px}
+.brand svg{flex:none}
+.brand small{display:block;font-weight:500;font-size:12px;color:#a9b6d3;letter-spacing:0}
+nav{display:flex;gap:4px;width:100%;overflow-x:auto}
+nav button{background:none;border:0;color:#b8c3dc;padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer;font-weight:700;white-space:nowrap}
+nav button.on{color:#fff;border-bottom-color:#ffb13b}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.banner{background:#fff4d6;border:1px solid #f1d27a;color:#6b4e00;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(15,26,46,.06);border:1px solid var(--line);margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.card h3{font-size:15px;margin:0 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:140px;flex:1}
+.field label{font-size:13px;color:var(--ink2);font-weight:500}
+input,select,textarea{border:1px solid #cfd6e2;border-radius:10px;padding:9px 11px;background:#fff;min-height:42px}
+input:focus,select:focus,textarea:focus{outline:2px solid #9ec5f4;border-color:var(--s1)}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--navy2);color:#fff;min-height:42px}
+.btn.light{background:#e9edf4;color:var(--ink)}
+.btn.danger{background:#fde8e8;color:var(--bad)}
+.btn.small{padding:6px 10px;min-height:32px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mode{border:2px solid var(--line);border-radius:14px;padding:12px;background:#fff;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.mode b{font-size:16px}
+.mode span{font-size:12px;color:var(--ink2)}
+.mode .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+.mode.on{border-color:var(--mc);background:color-mix(in srgb,var(--mc) 8%,#fff)}
+.seg{display:inline-flex;background:#e9edf4;border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;color:var(--ink2)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1);font-weight:700}
+/* tool */
+.tool{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.clock{background:var(--navy);color:#fff;border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.clock .t{font-size:56px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1}
+.clock .lbl{font-size:13px;color:#a9b6d3}
+.clock.done{background:#7a1f1f}
+.clock.run{background:#0f3d2e}
+.counter{border:2px dashed var(--line);border-radius:14px;padding:14px;text-align:center;display:flex;flex-direction:column;gap:10px;justify-content:center}
+.counter .n{font-size:64px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.plus{font-size:28px;font-weight:900;padding:18px;border-radius:14px;border:0;color:#fff;cursor:pointer;background:var(--mc)}
+.plus:active{transform:scale(.97)}
+.btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:#f7f9fc;border-radius:12px;padding:10px 12px;border:1px solid var(--line)}
+.stat .k{font-size:12px;color:var(--ink2)}
+.stat .v{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12px;color:var(--muted)}
+.up{color:var(--good);font-weight:700}.down{color:var(--bad);font-weight:700}
+.chartbox{position:relative;height:280px}
+.chartbox.tall{height:360px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--ink2);font-weight:500;font-size:13px;background:#f7f9fc}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.me td{background:#eef5ff;font-weight:700}
+.tablewrap{overflow-x:auto}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:#eef1f6;color:var(--ink2)}
+.tag.attack{background:#fdebe3;color:#a5400f}.tag.chase{background:#ddf5ec;color:#0c6d4a}.tag.keeper{background:#ebe8fb;color:#4636a8}
+.muted{color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;transition:.25s;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--bad)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.legend-note{font-size:12px;color:var(--ink2);margin-top:6px}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(10,15,30,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal .card{max-width:380px;width:100%;margin:0}
+@media (max-width:760px){
+  .modes{grid-template-columns:1fr}
+  .tool,.grid2{grid-template-columns:1fr}
+  .clock .t{font-size:48px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="#ffb13b" stroke-width="2.4"><circle cx="9" cy="9" r="5"/><circle cx="31" cy="9" r="5"/><circle cx="9" cy="31" r="5"/><circle cx="31" cy="31" r="5"/><path d="M13 13l5 5M27 13l-5 5M13 27l5-5M27 27l-5-5"/></g><circle cx="20" cy="20" r="5" fill="#fff"/></svg>
+      <div>無人機足球 練習紀錄<small>進攻・防守追球・防守守門</small></div>
+    </div>
+    <nav id="nav">
+      <button data-tab="record" class="on">📝 記錄</button>
+      <button data-tab="progress">📈 我的進步</button>
+      <button data-tab="compare">🏆 同學比較</button>
+      <button data-tab="manage">⚙️ 管理</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="demoBanner" class="banner hidden">目前是 <b>示範模式</b>：資料只存在這個瀏覽器裡（含範例資料）。架設到 NAS 後，所有人的資料會存在伺服器資料庫。</div>
+
+  <!-- ============ 記錄 ============ -->
+  <section id="tab-record">
+    <div class="card">
+      <h2>1. 選擇學生與日期</h2>
+      <div class="row">
+        <div class="field"><label>學生</label><select id="recStudent"></select></div>
+        <div class="field"><label>日期</label><input type="date" id="recDate"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. 選擇練習模式</h2>
+      <div class="modes" id="recModes"></div>
+    </div>
+
+    <div class="card" id="toolCard">
+      <h2 id="toolTitle">3. 開始練習</h2>
+      <div class="row" id="limitRow" style="margin-bottom:12px">
+        <div class="field" style="max-width:220px"><label>限時</label>
+          <select id="recLimit">
+            <option value="30">30 秒</option><option value="60" selected>1 分鐘</option><option value="90">1 分 30 秒</option>
+            <option value="120">2 分鐘</option><option value="180">3 分鐘</option><option value="300">5 分鐘</option>
+          </select>
+        </div>
+        <div class="muted" style="flex:2">按「開始」倒數，每成功一次按大按鈕 +1。時間到會有提示音，次數會自動填入。</div>
+      </div>
+
+      <!-- 計數模式 -->
+      <div class="tool" id="countTool">
+        <div class="clock" id="cdClock">
+          <div class="lbl">剩餘時間</div>
+          <div class="t" id="cdTime">1:00</div>
+          <div class="btns">
+            <button class="btn light" id="cdStart">▶ 開始</button>
+            <button class="btn light" id="cdReset">↺ 重設</button>
+          </div>
+        </div>
+        <div class="counter">
+          <div class="lbl muted" id="countLbl">成功次數</div>
+          <div class="n" id="countN">0</div>
+          <button class="plus" id="countPlus">＋1</button>
+          <div class="btns"><button class="btn light small" id="countMinus">－1 修正</button></div>
+        </div>
+      </div>
+
+      <!-- 守門碼錶 -->
+      <div class="tool hidden" id="keepTool">
+        <div class="clock" id="swClock">
+          <div class="lbl">連續守住時間</div>
+          <div class="t" id="swTime">0:00.0</div>
+          <div class="lbl" id="swHint">對方開始進攻時按「開始」</div>
+        </div>
+        <div class="counter">
+          <button class="plus" id="swStart">▶ 開始守門</button>
+          <button class="plus" id="swStop" style="background:var(--bad)" disabled>✋ 失守（停止）</button>
+          <div class="btns"><button class="btn light small" id="swReset">↺ 重設</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. 確認成績並儲存</h2>
+      <div class="row">
+        <div class="field" style="max-width:200px"><label id="valLbl">成功次數</label><input type="number" id="recValue" min="0" step="1" inputmode="decimal"></div>
+        <div class="field" style="flex:3"><label>備註（選填）</label><input type="text" id="recNote" maxlength="200" placeholder="例如：風大、換新電池、對手是誰…"></div>
+        <button class="btn" id="recSave" style="min-width:120px">💾 儲存</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>今天的紀錄 <span class="muted" id="todayWho"></span></h2>
+      <div id="todayList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 我的進步 ============ -->
+  <section id="tab-progress" class="hidden">
+    <div class="card">
+      <div class="row">
+        <div class="field" style="max-width:260px"><label>學生</label><select id="pgStudent"></select></div>
+        <div class="field" style="flex:0 0 auto;min-width:0"><label>期間</label><div class="seg" id="pgRange"></div></div>
+        <div class="field" style="flex:0 0 auto;min-width:0"><label>進攻／追球的計算方式</label><div class="seg" id="pgUnit"></div></div>
+      </div>
+    </div>
+    <div id="pgCards"></div>
+  </section>
+
+  <!-- ============ 同學比較 ============ -->
+  <section id="tab-compare" class="hidden">
+    <div class="card">
+      <div class="row">
+        <div class="field" style="flex:0 0 auto;min-width:0"><label>模式</label><div class="seg" id="cmpMode"></div></div>
+        <div class="field" style="flex:0 0 auto;min-width:0"><label>期間</label><div class="seg" id="cmpRange"></div></div>
+        <div class="field" style="flex:0 0 auto;min-width:0"><label>比較指標</label><div class="seg" id="cmpMetric"></div></div>
+        <div class="field" style="flex:0 0 auto;min-width:0" id="cmpUnitWrap"><label>計算方式</label><div class="seg" id="cmpUnit"></div></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field" style="max-width:200px"><label>位置</label><select id="cmpRole"><option value="">全部</option><option value="進攻">進攻手</option><option value="防守">防守手</option></select></div>
+        <div class="field" style="max-width:200px"><label>隊伍</label><select id="cmpTeam"><option value="">全部</option></select></div>
+        <div class="field" style="max-width:220px"><label>標示自己</label><select id="cmpMe"><option value="">（不標示）</option></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 id="cmpTitle">排行榜</h2>
+      <div class="chartbox" id="cmpBarBox"><canvas id="cmpBar"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>詳細數據</h2>
+      <div class="tablewrap" id="cmpTable"></div>
+    </div>
+    <div class="card">
+      <h2>進步曲線對比 <span class="muted">（每天的最佳成績）</span></h2>
+      <div class="chartbox tall"><canvas id="cmpLine"></canvas></div>
+      <div class="legend-note">點圖例上的名字可以隱藏／顯示該同學。</div>
+    </div>
+  </section>
+
+  <!-- ============ 管理 ============ -->
+  <section id="tab-manage" class="hidden">
+    <div class="card" id="pinCard">
+      <h2>🔒 老師管理</h2>
+      <p class="muted" style="margin-top:0">新增／修改學生、刪除紀錄需要老師管理密碼。學生只要用「記錄」頁就能登錄成績。</p>
+      <div class="row">
+        <div class="field" style="max-width:220px"><label>管理密碼</label><input type="password" id="pinInput" inputmode="numeric" autocomplete="off"></div>
+        <button class="btn" id="pinBtn">解鎖</button>
+      </div>
+    </div>
+    <div id="adminArea" class="hidden">
+      <div class="card">
+        <h2>👥 學生名單</h2>
+        <div class="row" style="margin-bottom:12px">
+          <div class="field"><label>姓名</label><input id="stName" placeholder="例如：王小明"></div>
+          <div class="field"><label>隊伍</label><input id="stTeam" placeholder="例如：紅隊" list="teamList"></div>
+          <div class="field"><label>主要位置</label><select id="stRole"><option value="">未定</option><option>進攻</option><option>防守</option></select></div>
+          <button class="btn" id="stAdd">＋ 新增</button>
+        </div>
+        <datalist id="teamList"></datalist>
+        <div class="tablewrap" id="stTable"></div>
+      </div>
+      <div class="card">
+        <h2>🗂 所有紀錄</h2>
+        <div class="row" style="margin-bottom:12px">
+          <div class="field" style="max-width:220px"><label>學生</label><select id="rlStudent"><option value="">全部</option></select></div>
+          <div class="field" style="max-width:200px"><label>模式</label><select id="rlMode"><option value="">全部</option><option value="attack">進攻</option><option value="chase">防守追球</option><option value="keeper">防守守門</option></select></div>
+          <button class="btn light" id="exportBtn">⬇ 匯出 CSV（Excel 可開）</button>
+          <button class="btn danger hidden" id="demoReset">清除示範資料</button>
+        </div>
+        <div class="tablewrap" id="rlTable"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal hidden" id="confirmModal"><div class="card">
+  <h3 id="confirmText">確定嗎？</h3>
+  <div class="btns" style="justify-content:flex-end;margin-top:14px">
+    <button class="btn light" id="confirmNo">取消</button><button class="btn" style="background:var(--bad)" id="confirmYes">確定</button>
+  </div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 基本設定 ================= */
+const MODES = {
+  attack: {name:'進攻',     desc:'時間內進攻成功的次數', unit:'次', color:'#eb6834', timed:true,  countLbl:'進攻成功次數'},
+  chase:  {name:'防守追球', desc:'時間內完成路線的次數', unit:'次', color:'#1baf7a', timed:true,  countLbl:'完成路線次數'},
+  keeper: {name:'防守守門', desc:'連續守住球框的時間',   unit:'秒', color:'#6250d6', timed:false, countLbl:'守住秒數'},
+};
+const SERIES = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#6250d6','#e34948'];
+const RANGES = [['7','近 7 天'],['30','近 30 天'],['90','近 3 個月'],['all','全部']];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => ymd(new Date());
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return ymd(d); };
+const store = {
+  get(k, def){ try { const v = localStorage.getItem('dp_'+k); return v==null ? def : JSON.parse(v); } catch { return def; } },
+  set(k, v){ try { localStorage.setItem('dp_'+k, JSON.stringify(v)); } catch {} },
+};
+function fmtSec(s){
+  s = Number(s); if (!isFinite(s)) return '—';
+  if (s < 60) return s.toFixed(1).replace(/\.0$/,'') + ' 秒';
+  const m = Math.floor(s/60), r = s - m*60;
+  return `${m} 分 ${r.toFixed(r%1?1:0)} 秒`;
+}
+function fmtVal(mode, v, unit){
+  if (v == null || !isFinite(v)) return '—';
+  if (mode === 'keeper') return fmtSec(v);
+  if (unit === 'rate') return v.toFixed(1) + ' 次/分';
+  return (Math.round(v*10)/10) + ' 次';
+}
+function toast(msg, err){
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.className = 'toast', 2200);
+}
+function confirmBox(text){
+  return new Promise(res => {
+    $('#confirmText').textContent = text; $('#confirmModal').classList.remove('hidden');
+    const done = v => { $('#confirmModal').classList.add('hidden'); $('#confirmYes').onclick = $('#confirmNo').onclick = null; res(v); };
+    $('#confirmYes').onclick = () => done(true); $('#confirmNo').onclick = () => done(false);
+  });
+}
+function seg(el, options, value, onChange){
+  el.innerHTML = options.map(([v,l]) => `<button data-v="${v}" class="${v===value?'on':''}">${l}</button>`).join('');
+  el.onclick = e => { const b = e.target.closest('button'); if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.classList.toggle('on', x===b)); onChange(b.dataset.v); };
+}
+/** 一筆紀錄的成績：守門=秒；進攻/追球可換算為「每分鐘次數」，讓不同限時可以公平比較 */
+function score(r, unit){
+  if (r.mode !== 'keeper' && unit === 'rate' && r.time_limit) return r.value * 60 / r.time_limit;
+  return Number(r.value);
+}
+
+/* ================= 資料存取：伺服器 or 示範模式 ================= */
+const API = {
+  demo: false,
+  pin: sessionStorage.getItem('dp_pin') || '',
+  async init(){
+    try {
+      const r = await fetch('api/ping', {cache:'no-store'});
+      if (!r.ok) throw 0;
+      const j = await r.json(); if (!j.ok) throw 0;
+      this.pinRequired = j.pin_required;
+    } catch { this.demo = true; Demo.load(); }
+  },
+  async req(method, path, body){
+    if (this.demo) return Demo.req(method, path, body);
+    const r = await fetch('api/' + path, {method, headers:{'Content-Type':'application/json','X-Admin-Pin':this.pin}, body: body ? JSON.stringify(body) : undefined});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || '發生錯誤');
+    return j;
+  },
+};
+
+/* 示範模式：資料放在瀏覽器裡，並自動產生範例資料 */
+const Demo = {
+  db: null,
+  load(){
+    this.db = store.get('demo', null);
+    if (!this.db) { this.db = this.seed(); this.save(); }
+  },
+  save(){ store.set('demo', this.db); },
+  seed(){
+    let x = 7; const rnd = () => (x = (x*16807) % 2147483647) / 2147483647;
+    const names = [['王小明','紅隊','進攻'],['李佳穎','紅隊','防守'],['陳柏翰','紅隊','防守'],['林品妤','藍隊','進攻'],['張家豪','藍隊','防守'],['黃子晴','藍隊','防守']];
+    const students = names.map(([name,team,role],i) => ({id:i+1,name,team,role,active:1}));
+    const records = []; let id = 1;
+    const days = []; for (let d = 34; d >= 0; d -= (d%7===0?3:2)) days.push(d);
+    students.forEach((s,i) => {
+      const skill = 0.7 + rnd()*0.6, grow = 0.4 + rnd()*0.9;
+      days.forEach((d,k) => {
+        if (rnd() < 0.18) return;          // 偶爾缺席
+        const p = k / days.length;           // 0 → 1 練習進度
+        const tries = 1 + Math.floor(rnd()*2);
+        for (let t=0;t<tries;t++){
+          const main = s.role === '進攻';
+          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'attack', time_limit:60,
+            value: Math.max(0, Math.round((main?4:2)*skill + p*grow*(main?4:2) + (rnd()-.5)*3)), note:''});
+          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'chase', time_limit:60,
+            value: Math.max(0, Math.round((main?2:3)*skill + p*grow*3 + (rnd()-.5)*2)), note:''});
+          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'keeper', time_limit:null,
+            value: Math.max(2, Math.round(((main?15:25)*skill + p*grow*(main?20:40) + (rnd()-.5)*14)*10)/10), note:''});
+        }
+      });
+    });
+    return {students, records, nextS: students.length+1, nextR: id};
+  },
+  async req(method, path, body){
+    const db = this.db, [res, idStr] = path.split('?')[0].split('/'); const id = +idStr;
+    const needPin = () => { if (API.pin !== '1234') throw new Error('需要老師管理密碼（示範模式密碼：1234）'); };
+    let out;
+    if (res === 'check_pin') { needPin(); out = {ok:true}; }
+    else if (res === 'students') {
+      if (method === 'GET') out = JSON.parse(JSON.stringify(db.students));
+      else { needPin();
+        if (method === 'POST') {
+          if (!body.name?.trim()) throw new Error('請輸入名字');
+          if (db.students.some(s => s.name === body.name.trim())) throw new Error('名字重複了');
+          db.students.push({id:db.nextS, name:body.name.trim(), team:body.team||'', role:body.role||'', active:1}); out = {id:db.nextS++};
+        } else if (method === 'PUT') { Object.assign(db.students.find(s => s.id===id), body); out = {ok:true}; }
+        else if (method === 'DELETE') { db.students = db.students.filter(s => s.id!==id); db.records = db.records.filter(r => r.student_id!==id); out = {ok:true}; }
+      }
+    } else if (res === 'records') {
+      if (method === 'GET') out = db.records.map(r => ({...r, student_name:(db.students.find(s => s.id===r.student_id)||{}).name}));
+      else if (method === 'POST') {
+        if (!body.student_id || body.value === '' || body.value == null || isNaN(body.value)) throw new Error('請選學生並輸入成績');
+        db.records.push({id:db.nextR, student_id:+body.student_id, date:body.date, mode:body.mode, value:+body.value,
+          time_limit: body.mode==='keeper' ? null : +body.time_limit, note:body.note||''}); out = {id:db.nextR++};
+      } else if (method === 'DELETE') { needPin(); db.records = db.records.filter(r => r.id!==id); out = {ok:true}; }
+    }
+    this.save(); return out;
+  },
+};
+
+/* ================= 狀態 ================= */
+const S = {
+  students: [], records: [],
+  tab: 'record',
+  recMode: store.get('recMode','attack'),
+  pgRange: 'all', pgUnit: 'raw',
+  cmpMode: 'attack', cmpRange: '30', cmpMetric: 'best', cmpUnit: 'raw',
+  charts: {},
+};
+async function reload(){
+  [S.students, S.records] = await Promise.all([API.req('GET','students'), API.req('GET','records')]);
+  S.records.forEach(r => { r.value = +r.value; r.time_limit = r.time_limit ? +r.time_limit : null; });
+  fillStudentSelects();
+}
+const activeStudents = () => S.students.filter(s => +s.active);
+const studentName = id => (S.students.find(s => s.id===+id)||{}).name || '?';
+
+function fillStudentSelects(){
+  const opts = activeStudents().map(s => `<option value="${s.id}">${esc(s.name)}${s.team?'（'+esc(s.team)+'）':''}</option>`).join('');
+  const keep = (sel, prefix='', key) => { const el = $(sel); const v = el.value || (key ? String(store.get(key,'')) : '');
+    el.innerHTML = prefix + opts; if ([...el.options].some(o => o.value===v)) el.value = v; };
+  keep('#recStudent', '<option value="">— 請選擇 —</option>', 'me');
+  keep('#pgStudent', '', 'me');
+  keep('#cmpMe', '<option value="">（不標示）</option>', 'me');
+  keep('#rlStudent', '<option value="">全部</option>');
+  const teams = [...new Set(S.students.map(s => s.team).filter(Boolean))];
+  const ct = $('#cmpTeam'), cv = ct.value;
+  ct.innerHTML = '<option value="">全部</option>' + teams.map(t => `<option>${esc(t)}</option>`).join(''); ct.value = cv;
+  $('#teamList').innerHTML = teams.map(t => `<option value="${esc(t)}">`).join('');
+}
+
+/* ================= 分頁 ================= */
+$('#nav').onclick = e => { const b = e.target.closest('button'); if (!b) return; showTab(b.dataset.tab); };
+function showTab(t){
+  S.tab = t;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab===t));
+  ['record','progress','compare','manage'].forEach(x => $('#tab-'+x).classList.toggle('hidden', x!==t));
+  if (t==='record') renderToday();
+  if (t==='progress') renderProgress();
+  if (t==='compare') renderCompare();
+  if (t==='manage') renderManage();
+  try { history.replaceState(null,'','#'+t); } catch {}
+}
+
+/* ================= 記錄頁 ================= */
+$('#recDate').value = today();
+$('#recModes').innerHTML = Object.entries(MODES).map(([k,m]) =>
+  `<button class="mode" data-m="${k}" style="--mc:${m.color}"><b><span class="dot" style="background:${m.color}"></span>${m.name}</b><span>${m.desc}</span></button>`).join('');
+$('#recModes').onclick = e => { const b = e.target.closest('.mode'); if (b) setRecMode(b.dataset.m); };
+$('#recStudent').onchange = e => { store.set('me', e.target.value); renderToday(); };
+
+function setRecMode(m){
+  if (timer.running || sw.running) { toast('請先停止計時', true); return; }
+  S.recMode = m; store.set('recMode', m);
+  const M = MODES[m];
+  document.querySelectorAll('#recModes .mode').forEach(b => b.classList.toggle('on', b.dataset.m===m));
+  $('#toolCard').style.setProperty('--mc', M.color);
+  $('#countTool').classList.toggle('hidden', !M.timed);
+  $('#limitRow').classList.toggle('hidden', !M.timed);
+  $('#keepTool').classList.toggle('hidden', M.timed);
+  $('#toolTitle').textContent = '3. ' + M.name + (M.timed ? '：倒數計時＋計數' : '：碼錶計時');
+  $('#countLbl').textContent = M.countLbl;
+  $('#valLbl').textContent = M.timed ? M.countLbl : '守住時間（秒）';
+  $('#recValue').step = M.timed ? '1' : '0.1';
+  resetCount(); resetSw(); $('#recValue').value = '';
+}
+
+/* 提示音（使用者按下按鈕後才能播放） */
+let actx;
+function beep(freq=880, dur=.25, times=1){
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i=0;i<times;i++){
+      const o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + i*(dur+.08);
+      o.frequency.value = freq; o.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(.25, t0); g.gain.exponentialRampToValueAtTime(.001, t0+dur);
+      o.start(t0); o.stop(t0+dur);
+    }
+  } catch {}
+  try { navigator.vibrate && navigator.vibrate(200*times); } catch {}
+}
+
+/* 倒數計時 + 計數 */
+const timer = {running:false, left:60, end:0, id:0};
+let count = 0;
+const fmtClock = s => `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
+function limitSec(){ return +$('#recLimit').value; }
+function drawCd(){
+  $('#cdTime').textContent = fmtClock(Math.ceil(timer.left));
+  $('#cdClock').className = 'clock' + (timer.running ? ' run' : timer.left<=0 ? ' done' : '');
+  $('#cdStart').textContent = timer.running ? '⏸ 暫停' : (timer.left < limitSec() && timer.left > 0 ? '▶ 繼續' : '▶ 開始');
+}
+function resetCount(){
+  clearInterval(timer.id); timer.running = false; timer.left = limitSec(); count = 0;
+  $('#countN').textContent = 0; $('#countPlus').disabled = false; drawCd();
+}
+$('#recLimit').onchange = resetCount;
+$('#cdStart').onclick = () => {
+  if (timer.running) { clearInterval(timer.id); timer.running = false; drawCd(); return; }
+  if (timer.left <= 0) resetCount();
+  beep(660,.12);
+  timer.running = true; timer.end = performance.now() + timer.left*1000;
+  let lastWarn = 99;
+  timer.id = setInterval(() => {
+    timer.left = Math.max(0, (timer.end - performance.now())/1000);
+    const c = Math.ceil(timer.left);
+    if (c <= 3 && c > 0 && c < lastWarn) { lastWarn = c; beep(520,.08); }
+    if (timer.left <= 0) { clearInterval(timer.id); timer.running = false; beep(988,.35,3);
+      $('#recValue').value = count; toast(`時間到！共 ${count} 次，已填入成績`); }
+    drawCd();
+  }, 100);
+  drawCd();
+};
+$('#cdReset').onclick = resetCount;
+function bump(d){
+  if (timer.left <= 0 && d > 0) { toast('時間已到，請按重設', true); return; }
+  count = Math.max(0, count + d); $('#countN').textContent = count; $('#recValue').value = count;
+}
+$('#countPlus').onclick = () => bump(1);
+$('#countMinus').onclick = () => bump(-1);
+
+/* 守門碼錶 */
+const sw = {running:false, start:0, elapsed:0, id:0};
+const fmtSw = s => `${Math.floor(s/60)}:${pad(Math.floor(s%60))}.${Math.floor((s*10)%10)}`;
+function drawSw(){
+  $('#swTime').textContent = fmtSw(sw.elapsed);
+  $('#swClock').className = 'clock' + (sw.running ? ' run' : sw.elapsed>0 ? ' done' : '');
+  $('#swStart').disabled = sw.running; $('#swStop').disabled = !sw.running;
+  $('#swHint').textContent = sw.running ? '守住中…被進球時按「失守」' : sw.elapsed>0 ? '已停止，成績已填入' : '對方開始進攻時按「開始」';
+}
+function resetSw(){ clearInterval(sw.id); sw.running=false; sw.elapsed=0; drawSw(); }
+$('#swStart').onclick = () => {
+  beep(660,.12); sw.running = true; sw.elapsed = 0; sw.start = performance.now();
+  sw.id = setInterval(() => { sw.elapsed = (performance.now()-sw.start)/1000; drawSw(); }, 100); drawSw();
+};
+$('#swStop').onclick = () => {
+  clearInterval(sw.id); sw.elapsed = (performance.now()-sw.start)/1000; sw.running = false; beep(330,.4);
+  $('#recValue').value = sw.elapsed.toFixed(1); drawSw(); toast(`守住 ${fmtSec(sw.elapsed)}，已填入成績`);
+};
+$('#swReset').onclick = resetSw;
+
+$('#recSave').onclick = async () => {
+  const sid = $('#recStudent').value, v = $('#recValue').value, m = S.recMode;
+  if (!sid) return toast('請先選擇學生', true);
+  if (v === '' || isNaN(v) || +v < 0) return toast('請輸入成績', true);
+  if (timer.running || sw.running) return toast('計時還在進行中', true);
+  $('#recSave').disabled = true;
+  try {
+    await API.req('POST','records', {student_id:+sid, date:$('#recDate').value || today(), mode:m, value:+v,
+      time_limit: MODES[m].timed ? limitSec() : null, note:$('#recNote').value});
+    await reload();
+    const best = Math.max(...S.records.filter(r => r.student_id===+sid && r.mode===m && (m==='keeper' || r.time_limit===limitSec())).map(r => r.value));
+    toast(+v >= best ? '🎉 已儲存，這是你的個人最佳紀錄！' : '✅ 已儲存');
+    $('#recValue').value = ''; $('#recNote').value = '';
+    MODES[m].timed ? resetCount() : resetSw();
+    renderToday();
+  } catch (e) { toast(e.message, true); }
+  $('#recSave').disabled = false;
+};
+
+function renderToday(){
+  const sid = +$('#recStudent').value, d = $('#recDate').value;
+  $('#todayWho').textContent = sid ? `— ${studentName(sid)}，${d}` : '';
+  if (!sid) { $('#todayList').innerHTML = '<div class="empty">先選擇學生</div>'; return; }
+  const rs = S.records.filter(r => r.student_id===sid && r.date===d).reverse();
+  if (!rs.length) { $('#todayList').innerHTML = '<div class="empty">這天還沒有紀錄，開始練習吧！</div>'; return; }
+  $('#todayList').innerHTML = `<div class="tablewrap"><table><tr><th>模式</th><th class="num">成績</th><th>限時</th><th>備註</th></tr>${
+    rs.map(r => `<tr><td><span class="tag ${r.mode}">${MODES[r.mode].name}</span></td><td class="num"><b>${fmtVal(r.mode,r.value)}</b></td><td>${r.time_limit?fmtClock(r.time_limit):'—'}</td><td>${esc(r.note)}</td></tr>`).join('')
+  }</table></div>`;
+}
+
+/* ================= 統計工具 ================= */
+function inRange(r, range){ return range==='all' || r.date >= daysAgo(+range - 1); }
+function byDate(rs, unit){
+  const m = new Map();
+  rs.forEach(r => { const a = m.get(r.date) || []; a.push(score(r,unit)); m.set(r.date,a); });
+  return [...m.entries()].sort((a,b) => a[0]<b[0]?-1:1).map(([d,a]) => ({d, best:Math.max(...a), avg:a.reduce((x,y)=>x+y,0)/a.length, n:a.length}));
+}
+function summary(rs, unit){
+  if (!rs.length) return null;
+  const vals = rs.map(r => score(r,unit)), days = byDate(rs,unit);
+  const first = days[0], last = days[days.length-1];
+  return { n: rs.length, days: days.length, best: Math.max(...vals), avg: vals.reduce((a,b)=>a+b,0)/vals.length,
+    latest: score(rs[rs.length-1],unit), firstAvg: first.avg, lastAvg: last.avg,
+    change: days.length>1 && first.avg>0 ? (last.avg-first.avg)/first.avg*100 : null };
+}
+const chg = c => c==null ? '<span class="muted">—</span>' : `<span class="${c>=0?'up':'down'}">${c>=0?'▲':'▼'} ${Math.abs(c).toFixed(0)}%</span>`;
+const shortDate = d => d.slice(5).replace('-','/');
+function kill(key){ if (S.charts[key]) { S.charts[key].destroy(); delete S.charts[key]; } }
+const baseOpts = (mode, unit) => ({
+  responsive:true, maintainAspectRatio:false, animation:{duration:300},
+  interaction:{mode:'index', intersect:false},
+  plugins:{ legend:{position:'bottom', labels:{usePointStyle:true, boxWidth:8, color:'#4a5468', font:{family:'Noto Sans TC'}}},
+    tooltip:{backgroundColor:'#13203a', padding:10, titleFont:{family:'Noto Sans TC'}, bodyFont:{family:'Noto Sans TC'},
+      callbacks:{label: c => ` ${c.dataset.label}：${c.parsed.y==null?'—':fmtVal(mode, c.parsed.y ?? c.parsed.x, unit)}`}}},
+  scales:{ x:{grid:{display:false}, ticks:{color:'#8a93a5', font:{family:'Noto Sans TC'}}},
+    y:{beginAtZero:true, grid:{color:'#eef1f5'}, border:{display:false}, ticks:{color:'#8a93a5', font:{family:'Noto Sans TC'}},
+      title:{display:true, text: mode==='keeper'?'秒':(unit==='rate'?'次／分鐘':'次'), color:'#8a93a5'}}},
+});
+const noChart = () => typeof Chart === 'undefined';
+
+/* ================= 我的進步 ================= */
+seg($('#pgRange'), RANGES, S.pgRange, v => { S.pgRange = v; renderProgress(); });
+seg($('#pgUnit'), [['raw','原始次數'],['rate','換算每分鐘']], S.pgUnit, v => { S.pgUnit = v; renderProgress(); });
+$('#pgStudent').onchange = e => { store.set('me', e.target.value); renderProgress(); };
+
+function renderProgress(){
+  const sid = +$('#pgStudent').value, box = $('#pgCards');
+  Object.keys(S.charts).filter(k => k.startsWith('pg')).forEach(kill);
+  if (!sid) { box.innerHTML = '<div class="card empty">還沒有學生，請老師先到「管理」新增學生。</div>'; return; }
+  box.innerHTML = Object.entries(MODES).map(([k,M]) => `
+    <div class="card"><h2><span class="tag ${k}">${M.name}</span><span class="muted" style="font-weight:400">${M.desc}</span></h2>
+    <div class="stats" id="pgS-${k}"></div><div class="chartbox"><canvas id="pgC-${k}"></canvas></div></div>`).join('');
+  Object.keys(MODES).forEach(k => {
+    const unit = k==='keeper' ? 'raw' : S.pgUnit;
+    const all = S.records.filter(r => r.mode===k && inRange(r,S.pgRange));
+    const mine = all.filter(r => r.student_id===sid);
+    const sm = summary(mine, unit);
+    if (!sm) { $('#pgS-'+k).innerHTML = ''; $('#pgC-'+k).parentElement.innerHTML = '<div class="empty">這段期間還沒有這個模式的紀錄</div>'; return; }
+    // 班上（所有在籍同學）的同模式平均，作為參考線
+    const classSm = summary(all, unit);
+    $('#pgS-'+k).innerHTML = `
+      <div class="stat"><div class="k">個人最佳</div><div class="v">${fmtVal(k,sm.best,unit)}</div><div class="d">班上最佳 ${fmtVal(k,classSm.best,unit)}</div></div>
+      <div class="stat"><div class="k">平均</div><div class="v">${fmtVal(k,sm.avg,unit)}</div><div class="d">班上平均 ${fmtVal(k,classSm.avg,unit)}</div></div>
+      <div class="stat"><div class="k">最近一次</div><div class="v">${fmtVal(k,sm.latest,unit)}</div><div class="d">${mine[mine.length-1].date}</div></div>
+      <div class="stat"><div class="k">進步幅度</div><div class="v">${chg(sm.change)}</div><div class="d">第一天 vs 最近一天平均</div></div>
+      <div class="stat"><div class="k">練習量</div><div class="v">${sm.n} 次</div><div class="d">共 ${sm.days} 天</div></div>`;
+    if (noChart()) return;
+    const mineD = byDate(mine, unit), classD = new Map(byDate(all, unit).map(x => [x.d, x.avg]));
+    S.charts['pg'+k] = new Chart($('#pgC-'+k), { type:'line',
+      data:{ labels: mineD.map(x => shortDate(x.d)), datasets:[
+        {label:'當天最佳', data:mineD.map(x=>x.best), borderColor:SERIES[0], backgroundColor:SERIES[0], borderWidth:2, pointRadius:4, pointHoverRadius:6, tension:.25},
+        {label:'當天平均', data:mineD.map(x=>x.avg), borderColor:SERIES[1], backgroundColor:SERIES[1], borderWidth:2, pointRadius:4, pointHoverRadius:6, tension:.25},
+        {label:'班上平均', data:mineD.map(x=>classD.get(x.d)), borderColor:'#9aa3b2', backgroundColor:'#9aa3b2', borderDash:[5,4], borderWidth:2, pointRadius:0, tension:.25},
+      ]}, options: baseOpts(k, unit) });
+  });
+}
+
+/* ================= 同學比較 ================= */
+seg($('#cmpMode'), Object.entries(MODES).map(([k,m]) => [k,m.name]), S.cmpMode, v => { S.cmpMode = v; renderCompare(); });
+seg($('#cmpRange'), RANGES, S.cmpRange, v => { S.cmpRange = v; renderCompare(); });
+seg($('#cmpMetric'), [['best','最佳'],['avg','平均'],['latest','最近一次'],['change','進步幅度']], S.cmpMetric, v => { S.cmpMetric = v; renderCompare(); });
+seg($('#cmpUnit'), [['raw','原始次數'],['rate','每分鐘']], S.cmpUnit, v => { S.cmpUnit = v; renderCompare(); });
+['#cmpRole','#cmpTeam','#cmpMe'].forEach(s => $(s).onchange = renderCompare);
+
+function renderCompare(){
+  const k = S.cmpMode, M = MODES[k], unit = k==='keeper' ? 'raw' : S.cmpUnit, metric = S.cmpMetric;
+  $('#cmpUnitWrap').classList.toggle('hidden', k==='keeper');
+  const role = $('#cmpRole').value, team = $('#cmpTeam').value, me = +$('#cmpMe').value;
+  const studs = activeStudents().filter(s => (!role || s.role===role) && (!team || s.team===team));
+  const rows = studs.map((s,i) => ({ s, color: SERIES[S.students.indexOf(s) % SERIES.length],
+      rs: S.records.filter(r => r.student_id===s.id && r.mode===k && inRange(r,S.cmpRange)) }))
+    .map(x => ({...x, sm: summary(x.rs, unit)})).filter(x => x.sm);
+  const mv = x => metric==='change' ? x.sm.change : x.sm[metric];
+  rows.sort((a,b) => (mv(b) ?? -1e9) - (mv(a) ?? -1e9));
+  const metricName = {best:'最佳成績',avg:'平均成績',latest:'最近一次',change:'進步幅度'}[metric];
+  $('#cmpTitle').innerHTML = `🏆 ${M.name}排行榜 <span class="muted" style="font-weight:400">— ${metricName}</span>`;
+
+  kill('cmpBar'); kill('cmpLine');
+  if (!rows.length) {
+    $('#cmpTable').innerHTML = '<div class="empty">這段期間沒有資料</div>';
+    $('#cmpBarBox').style.height = '80px'; return;
+  }
+  // 表格
+  $('#cmpTable').innerHTML = `<table><tr><th>名次</th><th>學生</th><th>隊伍／位置</th><th class="num">練習</th><th class="num">最佳</th><th class="num">平均</th><th class="num">最近一次</th><th class="num">進步幅度</th></tr>${
+    rows.map((x,i) => `<tr class="${x.s.id===me?'me':''}"><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td>${esc(x.s.name)}</td><td>${esc(x.s.team||'—')}／${esc(x.s.role||'—')}</td>
+      <td class="num">${x.sm.n} 次</td><td class="num">${fmtVal(k,x.sm.best,unit)}</td><td class="num">${fmtVal(k,x.sm.avg,unit)}</td>
+      <td class="num">${fmtVal(k,x.sm.latest,unit)}</td><td class="num">${chg(x.sm.change)}</td></tr>`).join('')}</table>`;
+  if (noChart()) return;
+  // 排行長條圖
+  $('#cmpBarBox').style.height = Math.max(160, rows.length*42 + 50) + 'px';
+  const meIdx = rows.findIndex(x => x.s.id===me);
+  S.charts.cmpBar = new Chart($('#cmpBar'), { type:'bar',
+    data:{ labels: rows.map(x => x.s.name), datasets:[{ label: metricName, data: rows.map(x => mv(x) ?? 0),
+      backgroundColor: rows.map((x,i) => me && i!==meIdx ? color(M.color,.35) : M.color),
+      borderRadius:4, borderSkipped:'start', barThickness:22 }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:{duration:300},
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#13203a', padding:10,
+        callbacks:{label: c => ' ' + (metric==='change' ? `${c.parsed.x.toFixed(0)}%` : fmtVal(k,c.parsed.x,unit))}}},
+      scales:{ x:{beginAtZero: metric!=='change', grid:{color:'#eef1f5'}, border:{display:false}, ticks:{color:'#8a93a5',
+          callback: v => metric==='change' ? v+'%' : v},
+          title:{display:true, color:'#8a93a5', text: metric==='change' ? '%' : (k==='keeper'?'秒':unit==='rate'?'次／分鐘':'次')}},
+        y:{grid:{display:false}, ticks:{color:'#0f1a2e', font:{family:'Noto Sans TC', weight:'bold'}}}}}});
+  // 進步曲線對比（每人每天最佳）
+  const dates = [...new Set(rows.flatMap(x => x.rs.map(r => r.date)))].sort();
+  S.charts.cmpLine = new Chart($('#cmpLine'), { type:'line',
+    data:{ labels: dates.map(shortDate), datasets: rows.map(x => { const m = new Map(byDate(x.rs,unit).map(d => [d.d,d.best]));
+      const hi = !me || x.s.id===me;
+      return { label:x.s.name, data: dates.map(d => m.get(d) ?? null), spanGaps:true, borderColor: hi ? x.color : color(x.color,.3),
+        backgroundColor:x.color, borderWidth: x.s.id===me ? 3.5 : 2, pointRadius: x.s.id===me ? 4 : 3, pointHoverRadius:6, tension:.25 }; })},
+    options: baseOpts(k, unit) });
+}
+function color(hex, a){ const n = parseInt(hex.slice(1),16); return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`; }
+
+/* ================= 管理 ================= */
+async function unlock(pin){
+  API.pin = pin;
+  try { await API.req('POST','check_pin'); sessionStorage.setItem('dp_pin', pin);
+    $('#pinCard').classList.add('hidden'); $('#adminArea').classList.remove('hidden'); renderManage(); return true; }
+  catch (e) { API.pin = ''; return false; }
+}
+$('#pinBtn').onclick = async () => { if (!await unlock($('#pinInput').value)) toast('密碼錯誤' + (API.demo ? '（示範模式密碼：1234）' : ''), true); };
+$('#pinInput').onkeydown = e => { if (e.key==='Enter') $('#pinBtn').click(); };
+['#rlStudent','#rlMode'].forEach(s => $(s).onchange = renderManage);
+
+function renderManage(){
+  if ($('#adminArea').classList.contains('hidden')) return;
+  $('#demoReset').classList.toggle('hidden', !API.demo);
+  const cnt = id => S.records.filter(r => r.student_id===id).length;
+  $('#stTable').innerHTML = S.students.length ? `<table><tr><th>姓名</th><th>隊伍</th><th>位置</th><th class="num">紀錄數</th><th>狀態</th><th></th></tr>${
+    S.students.map(s => `<tr data-id="${s.id}" style="${+s.active?'':'opacity:.5'}">
+      <td><input value="${esc(s.name)}" data-f="name" style="min-height:34px;padding:5px 8px;width:110px"></td>
+      <td><input value="${esc(s.team)}" data-f="team" list="teamList" style="min-height:34px;padding:5px 8px;width:90px"></td>
+      <td><select data-f="role" style="min-height:34px;padding:5px 8px">${['','進攻','防守'].map(r => `<option value="${r}" ${s.role===r?'selected':''}>${r||'未定'}</option>`).join('')}</select></td>
+      <td class="num">${cnt(s.id)}</td>
+      <td><button class="btn light small" data-act="toggle">${+s.active?'在籍':'已停用'}</button></td>
+      <td><button class="btn danger small" data-act="del">刪除</button></td></tr>`).join('')}</table>
+    <p class="muted">直接修改姓名／隊伍／位置會自動儲存。學生畢業或退出可按「在籍」改成停用，資料會保留但不會出現在選單與排行。</p>`
+    : '<div class="empty">還沒有學生</div>';
+  const sid = +$('#rlStudent').value, md = $('#rlMode').value;
+  const rs = S.records.filter(r => (!sid || r.student_id===sid) && (!md || r.mode===md)).slice().reverse();
+  $('#rlTable').innerHTML = rs.length ? `<p class="muted" style="margin-top:0">共 ${rs.length} 筆${rs.length>200?'，顯示最新 200 筆':''}</p><table><tr><th>日期</th><th>學生</th><th>模式</th><th class="num">成績</th><th>限時</th><th>備註</th><th></th></tr>${
+    rs.slice(0,200).map(r => `<tr><td>${r.date}</td><td>${esc(studentName(r.student_id))}</td><td><span class="tag ${r.mode}">${MODES[r.mode].name}</span></td>
+      <td class="num">${fmtVal(r.mode,r.value)}</td><td>${r.time_limit?fmtClock(r.time_limit):'—'}</td><td>${esc(r.note)}</td>
+      <td><button class="btn danger small" data-del="${r.id}">刪除</button></td></tr>`).join('')}</table>` : '<div class="empty">沒有紀錄</div>';
+}
+$('#stAdd').onclick = async () => {
+  try { await API.req('POST','students', {name:$('#stName').value, team:$('#stTeam').value, role:$('#stRole').value});
+    $('#stName').value = ''; await reload(); renderManage(); toast('已新增學生'); } catch (e) { toast(e.message, true); }
+};
+$('#stName').onkeydown = e => { if (e.key==='Enter') $('#stAdd').click(); };
+$('#stTable').addEventListener('change', async e => {
+  const f = e.target.dataset.f; if (!f) return; const id = +e.target.closest('tr').dataset.id;
+  try { await API.req('PUT','students/'+id, {[f]: e.target.value}); await reload(); toast('已更新'); } catch (er) { toast(er.message, true); }
+});
+$('#stTable').addEventListener('click', async e => {
+  const act = e.target.dataset.act; if (!act) return; const id = +e.target.closest('tr').dataset.id, s = S.students.find(x => x.id===id);
+  try {
+    if (act==='toggle') await API.req('PUT','students/'+id, {active: +s.active ? 0 : 1});
+    if (act==='del') { if (!await confirmBox(`確定刪除「${s.name}」以及他的所有紀錄嗎？（若只是不再練習，建議改用「停用」）`)) return;
+      await API.req('DELETE','students/'+id); }
+    await reload(); renderManage();
+  } catch (er) { toast(er.message, true); }
+});
+$('#rlTable').addEventListener('click', async e => {
+  const id = e.target.dataset.del; if (!id) return;
+  if (!await confirmBox('確定刪除這筆紀錄嗎？')) return;
+  try { await API.req('DELETE','records/'+id); await reload(); renderManage(); toast('已刪除'); } catch (er) { toast(er.message, true); }
+});
+$('#exportBtn').onclick = async () => {
+  if (!API.demo) { location.href = 'api/export.csv'; return; }
+  const lines = [['日期','學生','模式','成績','限時(秒)','備註'].join(',')].concat(
+    S.records.map(r => [r.date, studentName(r.student_id), MODES[r.mode].name, r.value, r.time_limit||'', `"${(r.note||'').replace(/"/g,'""')}"`].join(',')));
+  try { await navigator.clipboard.writeText(lines.join('\n')); toast('示範模式：CSV 已複製到剪貼簿'); } catch { toast('無法複製', true); }
+};
+$('#demoReset').onclick = async () => {
+  if (!await confirmBox('清除示範資料並重新產生範例？')) return;
+  Demo.db = Demo.seed(); Demo.save(); await reload(); renderManage(); toast('已重設示範資料');
+};
+
+/* ================= 啟動 ================= */
+(async () => {
+  await API.init();
+  if (API.demo) $('#demoBanner').classList.remove('hidden');
+  try { await reload(); } catch (e) { toast('讀取資料失敗：' + e.message, true); }
+  setRecMode(S.recMode);
+  if (API.pin) await unlock(API.pin);
+  if (noChart()) toast('圖表元件載入失敗，請確認網路連線', true);
+  const h = location.hash.slice(1);
+  showTab(['record','progress','compare','manage'].includes(h) ? h : 'record');
+})();
+</script>
+</body>
+</html>
