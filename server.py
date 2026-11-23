@@ -85,6 +85,14 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=STATIC_DIR, **kw)
 
+    def end_headers(self):
+        # 網頁、App 檔案每次都向伺服器確認是否有新版（避免 Cloudflare 或手機快取舊版）
+        if not self.path.startswith("/api/"):
+            self.send_header("Cache-Control", "no-cache")
+            if self.path.split("?")[0].endswith("sw.js"):
+                self.send_header("Service-Worker-Allowed", "/")
+        super().end_headers()
+
     def log_message(self, fmt, *args):
         print("[%s] %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), fmt % args))
 

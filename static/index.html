@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>無人機足球 練習紀錄</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#13203a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="無人機練習">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%2313203a'/%3E%3Cg fill='none' stroke='%23ffb13b' stroke-width='3'%3E%3Ccircle cx='11' cy='11' r='5'/%3E%3Ccircle cx='29' cy='11' r='5'/%3E%3Ccircle cx='11' cy='29' r='5'/%3E%3Ccircle cx='29' cy='29' r='5'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='4' fill='%23fff'/%3E%3C/svg%3E">
@@ -54,6 +61,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9ec5f4;border-color:v
 .seg{display:inline-flex;background:#e9edf4;border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
 .seg button{border:0;background:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;color:var(--ink2)}
 .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1);font-weight:700}
+/* 限時調整 */
+.limiter{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.lim-label{font-weight:700;color:var(--ink2);margin-right:2px}
+.spin{display:flex;align-items:center;gap:6px;background:#f3f5f9;border:1px solid var(--line);border-radius:12px;padding:4px}
+.spin button{width:44px;height:44px;border-radius:10px;border:0;background:#fff;font-size:22px;font-weight:900;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.spin button:active{transform:scale(.95)}
+.spin button:disabled{opacity:.4;cursor:not-allowed}
+.spin select{min-height:44px;font-size:19px;font-weight:900;padding:4px 10px;font-variant-numeric:tabular-nums;border-radius:10px;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center;min-width:76px;cursor:pointer}
+.spin span{font-size:14px;color:var(--ink2);margin-right:2px}
+#limPreset{min-height:46px}
+.install-btn{margin-left:auto;background:#ffb13b;color:#13203a;border:0;border-radius:10px;padding:8px 14px;font-weight:900;cursor:pointer}
+.ios-steps{margin:8px 0 0;padding-left:20px;line-height:1.9}
 /* tool */
 .tool{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
 .clock{background:var(--navy);color:#fff;border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px}
@@ -93,6 +112,13 @@ tr.me td{background:#eef5ff;font-weight:700}
 .modal{position:fixed;inset:0;background:rgba(10,15,30,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
 .modal .card{max-width:380px;width:100%;margin:0}
 @media (max-width:760px){
+  .lim-label{width:100%}
+  .limiter .spin{flex:1;justify-content:space-between;min-width:0}
+  .spin{gap:4px}
+  .spin button{width:38px;height:42px;flex:none}
+  .spin select{font-size:17px;flex:1;min-width:0;padding:4px 2px}
+  #limPreset{width:100%}
+  .install-btn{padding:6px 10px;font-size:14px}
   .modes{grid-template-columns:1fr}
   .tool,.grid2{grid-template-columns:1fr}
   .clock .t{font-size:48px}
@@ -106,6 +132,7 @@ tr.me td{background:#eef5ff;font-weight:700}
       <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="#ffb13b" stroke-width="2.4"><circle cx="9" cy="9" r="5"/><circle cx="31" cy="9" r="5"/><circle cx="9" cy="31" r="5"/><circle cx="31" cy="31" r="5"/><path d="M13 13l5 5M27 13l-5 5M13 27l5-5M27 27l-5-5"/></g><circle cx="20" cy="20" r="5" fill="#fff"/></svg>
       <div>無人機足球 練習紀錄<small>進攻・防守追球・防守守門</small></div>
     </div>
+    <button class="install-btn hidden" id="installBtn">📲 安裝 App</button>
     <nav id="nav">
       <button data-tab="record" class="on">📝 記錄</button>
       <button data-tab="progress">📈 我的進步</button>
@@ -116,6 +143,7 @@ tr.me td{background:#eef5ff;font-weight:700}
 </header>
 
 <main>
+  <div id="offlineBanner" class="banner hidden">📴 目前沒有網路：顯示的是上次讀到的成績，<b>暫時不能儲存新紀錄</b>。</div>
   <div id="demoBanner" class="banner hidden">目前是 <b>示範模式</b>：資料只存在這個瀏覽器裡（含範例資料）。架設到 NAS 後，所有人的資料會存在伺服器資料庫。</div>
 
   <!-- ============ 記錄 ============ -->
@@ -135,14 +163,27 @@ tr.me td{background:#eef5ff;font-weight:700}
 
     <div class="card" id="toolCard">
       <h2 id="toolTitle">3. 開始練習</h2>
-      <div class="row" id="limitRow" style="margin-bottom:12px">
-        <div class="field" style="max-width:220px"><label>限時</label>
-          <select id="recLimit">
-            <option value="30">30 秒</option><option value="60" selected>1 分鐘</option><option value="90">1 分 30 秒</option>
-            <option value="120">2 分鐘</option><option value="180">3 分鐘</option><option value="300">5 分鐘</option>
+      <div id="limitRow" style="margin-bottom:12px">
+        <div class="limiter">
+          <div class="lim-label">限時</div>
+          <div class="spin" aria-label="分鐘">
+            <button type="button" data-step="-60" aria-label="減 1 分鐘">−</button>
+            <select id="limMin"></select>
+            <button type="button" data-step="60" aria-label="加 1 分鐘">＋</button>
+          </div>
+          <div class="spin" aria-label="秒">
+            <button type="button" data-step="-5" aria-label="減 5 秒">−</button>
+            <select id="limSec"></select>
+            <button type="button" data-step="5" aria-label="加 5 秒">＋</button>
+          </div>
+          <select id="limPreset" aria-label="快速選擇">
+            <option value="">⚡ 快速選擇</option>
+            <option value="30">30 秒</option><option value="60">1 分鐘</option><option value="90">1 分 30 秒</option>
+            <option value="120">2 分鐘（常用）</option><option value="150">2 分 30 秒</option>
+            <option value="180">3 分鐘</option><option value="300">5 分鐘</option>
           </select>
         </div>
-        <div class="muted" style="flex:2">按「開始」倒數，每成功一次按大按鈕 +1。時間到會有提示音，次數會自動填入。</div>
+        <div class="muted" style="margin-top:8px">按「開始」倒數，每成功一次按大按鈕 +1。時間到會有提示音，次數會自動填入。秒數每次加減 5 秒。</div>
       </div>
 
       <!-- 計數模式 -->
@@ -277,6 +318,16 @@ tr.me td{background:#eef5ff;font-weight:700}
     <button class="btn light" id="confirmNo">取消</button><button class="btn" style="background:var(--bad)" id="confirmYes">確定</button>
   </div>
 </div></div>
+<div class="modal hidden" id="iosModal"><div class="card">
+  <h3>📲 安裝到 iPhone／iPad 主畫面</h3>
+  <ol class="ios-steps">
+    <li>用 <b>Safari</b> 打開這個網站</li>
+    <li>點下方的「分享」按鈕 <b>⎋</b>（方框加向上箭頭）</li>
+    <li>往下滑，點「<b>加入主畫面</b>」</li>
+    <li>按右上角「<b>新增</b>」</li>
+  </ol>
+  <div class="btns" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="iosClose">知道了</button></div>
+</div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -337,16 +388,19 @@ function score(r, unit){
 const API = {
   demo: false,
   pin: sessionStorage.getItem('dp_pin') || '',
+  offline: false,
   async init(){
     try {
       const r = await fetch('api/ping', {cache:'no-store'});
-      if (!r.ok) throw 0;
-      const j = await r.json(); if (!j.ok) throw 0;
+      const j = await r.json().catch(() => ({}));
+      if (j.offline) { this.offline = true; return; }   // App 離線：用上次存下的資料
+      if (!r.ok || !j.ok) throw 0;
       this.pinRequired = j.pin_required;
     } catch { this.demo = true; Demo.load(); }
   },
   async req(method, path, body){
     if (this.demo) return Demo.req(method, path, body);
+    if (this.offline && method !== 'GET') throw new Error('目前沒有網路，連上網路後再儲存');
     const r = await fetch('api/' + path, {method, headers:{'Content-Type':'application/json','X-Admin-Pin':this.pin}, body: body ? JSON.stringify(body) : undefined});
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || '發生錯誤');
@@ -500,17 +554,39 @@ function beep(freq=880, dur=.25, times=1){
 const timer = {running:false, left:60, end:0, id:0};
 let count = 0;
 const fmtClock = s => `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
-function limitSec(){ return +$('#recLimit').value; }
+/* 限時：分、秒都可加減，也可下拉快速選擇；會記住上次的設定（預設 2 分鐘） */
+const LIM_MIN = 5, LIM_MAX = 15*60;
+let limit = Math.min(LIM_MAX, Math.max(LIM_MIN, +store.get('limit', 120) || 120));
+$('#limMin').innerHTML = Array.from({length:16}, (_,i) => `<option value="${i}">${i} 分</option>`).join('');
+$('#limSec').innerHTML = Array.from({length:12}, (_,i) => `<option value="${i*5}">${pad(i*5)} 秒</option>`).join('');
+function limitSec(){ return limit; }
+function setLimit(sec){
+  if (timer.running) { toast('倒數中不能改時間，請先暫停並重設', true); drawLimit(); return; }
+  limit = Math.min(LIM_MAX, Math.max(LIM_MIN, Math.round(sec/5)*5));
+  store.set('limit', limit); resetCount();
+}
+function drawLimit(){
+  $('#limMin').value = Math.floor(limit/60);
+  $('#limSec').value = limit % 60;
+  $('#limPreset').value = [...$('#limPreset').options].some(o => +o.value === limit) ? String(limit) : '';
+  document.querySelectorAll('#limitRow .spin button').forEach(b => {
+    const n = limit + +b.dataset.step; b.disabled = timer.running || n < LIM_MIN || n > LIM_MAX; });
+  $('#limMin').disabled = $('#limSec').disabled = $('#limPreset').disabled = timer.running;
+}
+$('#limitRow').addEventListener('click', e => { const b = e.target.closest('button[data-step]'); if (b) setLimit(limit + +b.dataset.step); });
+$('#limMin').onchange = () => setLimit(+$('#limMin').value*60 + +$('#limSec').value);
+$('#limSec').onchange = () => setLimit(+$('#limMin').value*60 + +$('#limSec').value);
+$('#limPreset').onchange = e => { if (e.target.value) setLimit(+e.target.value); };
 function drawCd(){
   $('#cdTime').textContent = fmtClock(Math.ceil(timer.left));
   $('#cdClock').className = 'clock' + (timer.running ? ' run' : timer.left<=0 ? ' done' : '');
   $('#cdStart').textContent = timer.running ? '⏸ 暫停' : (timer.left < limitSec() && timer.left > 0 ? '▶ 繼續' : '▶ 開始');
+  drawLimit();
 }
 function resetCount(){
   clearInterval(timer.id); timer.running = false; timer.left = limitSec(); count = 0;
   $('#countN').textContent = 0; $('#countPlus').disabled = false; drawCd();
 }
-$('#recLimit').onchange = resetCount;
 $('#cdStart').onclick = () => {
   if (timer.running) { clearInterval(timer.id); timer.running = false; drawCd(); return; }
   if (timer.left <= 0) resetCount();
@@ -601,6 +677,7 @@ function summary(rs, unit){
     change: days.length>1 && first.avg>0 ? (last.avg-first.avg)/first.avg*100 : null };
 }
 const chg = c => c==null ? '<span class="muted">—</span>' : `<span class="${c>=0?'up':'down'}">${c>=0?'▲':'▼'} ${Math.abs(c).toFixed(0)}%</span>`;
+const diffTag = (d, k, unit) => d > 0 ? `<span class="up">▲ ${fmtVal(k,d,unit)}</span>` : d < 0 ? `<span class="down">▼ ${fmtVal(k,-d,unit)}</span>` : '持平';
 const shortDate = d => d.slice(5).replace('-','/');
 function kill(key){ if (S.charts[key]) { S.charts[key].destroy(); delete S.charts[key]; } }
 const baseOpts = (mode, unit) => ({
@@ -626,7 +703,8 @@ function renderProgress(){
   if (!sid) { box.innerHTML = '<div class="card empty">還沒有學生，請老師先到「管理」新增學生。</div>'; return; }
   box.innerHTML = Object.entries(MODES).map(([k,M]) => `
     <div class="card"><h2><span class="tag ${k}">${M.name}</span><span class="muted" style="font-weight:400">${M.desc}</span></h2>
-    <div class="stats" id="pgS-${k}"></div><div class="chartbox"><canvas id="pgC-${k}"></canvas></div></div>`).join('');
+    <div class="stats" id="pgS-${k}"></div><div class="chartbox"><canvas id="pgC-${k}"></canvas></div>
+    <div class="legend-note">每個點＝一次練習。手指點一下（或滑鼠移過去）就能看到是第幾次、跟上一次比是進步還是退步。</div></div>`).join('');
   Object.keys(MODES).forEach(k => {
     const unit = k==='keeper' ? 'raw' : S.pgUnit;
     const all = S.records.filter(r => r.mode===k && inRange(r,S.pgRange));
@@ -638,17 +716,33 @@ function renderProgress(){
     $('#pgS-'+k).innerHTML = `
       <div class="stat"><div class="k">個人最佳</div><div class="v">${fmtVal(k,sm.best,unit)}</div><div class="d">班上最佳 ${fmtVal(k,classSm.best,unit)}</div></div>
       <div class="stat"><div class="k">平均</div><div class="v">${fmtVal(k,sm.avg,unit)}</div><div class="d">班上平均 ${fmtVal(k,classSm.avg,unit)}</div></div>
-      <div class="stat"><div class="k">最近一次</div><div class="v">${fmtVal(k,sm.latest,unit)}</div><div class="d">${mine[mine.length-1].date}</div></div>
+      <div class="stat"><div class="k">最近一次</div><div class="v">${fmtVal(k,sm.latest,unit)}</div><div class="d">${mine.length>1 ? '跟上一次比 ' + diffTag(sm.latest - score(mine[mine.length-2],unit), k, unit) : mine[mine.length-1].date}</div></div>
       <div class="stat"><div class="k">進步幅度</div><div class="v">${chg(sm.change)}</div><div class="d">第一天 vs 最近一天平均</div></div>
       <div class="stat"><div class="k">練習量</div><div class="v">${sm.n} 次</div><div class="d">共 ${sm.days} 天</div></div>`;
     if (noChart()) return;
-    const mineD = byDate(mine, unit), classD = new Map(byDate(all, unit).map(x => [x.d, x.avg]));
+    // 每一筆成績都是一個點（依日期、登錄順序排列）
+    const classD = new Map(byDate(all, unit).map(x => [x.d, x.avg]));
+    const nth = {}; let run = -Infinity;
+    const pts = mine.map(r => { nth[r.date] = (nth[r.date]||0) + 1; const v = score(r,unit); run = Math.max(run, v);
+      return {r, v, n:nth[r.date], pb:run}; });
+    const starts = pts.map((p,i) => i===0 || p.r.date !== pts[i-1].r.date ? i : -1).filter(i => i>=0);
+    const every = Math.ceil(starts.length / 12), show = new Set(starts.filter((_,j) => j % every === 0));
+    const opts = baseOpts(k, unit);
+    opts.scales.x.ticks = {color:'#8a93a5', font:{family:'Noto Sans TC'}, autoSkip:false, maxRotation:0,
+      // 只在每天的第一筆標日期，避免 x 軸擠成一團
+      callback: (v,i) => show.has(i) ? shortDate(pts[i].r.date) : ''};
+    opts.scales.x.grid = {display:true, drawTicks:false, color: c => c.index>0 && pts[c.index] && pts[c.index].r.date !== pts[c.index-1].r.date ? '#e3e7ee' : 'transparent'};
+    opts.plugins.tooltip.callbacks.title = items => { const p = pts[items[0].dataIndex]; return `${shortDate(p.r.date)} 第 ${p.n} 次`; };
+    opts.plugins.tooltip.callbacks.afterBody = items => { const p = pts[items[0].dataIndex], i = items[0].dataIndex;
+      const out = []; if (i > 0) { const d = p.v - pts[i-1].v; out.push(`跟上一次比：${d>0?'▲ 進步':d<0?'▼ 退步':'持平'} ${d? fmtVal(k, Math.abs(d), unit):''}`); }
+      if (p.r.note) out.push('備註：' + p.r.note); return out; };
     S.charts['pg'+k] = new Chart($('#pgC-'+k), { type:'line',
-      data:{ labels: mineD.map(x => shortDate(x.d)), datasets:[
-        {label:'當天最佳', data:mineD.map(x=>x.best), borderColor:SERIES[0], backgroundColor:SERIES[0], borderWidth:2, pointRadius:4, pointHoverRadius:6, tension:.25},
-        {label:'當天平均', data:mineD.map(x=>x.avg), borderColor:SERIES[1], backgroundColor:SERIES[1], borderWidth:2, pointRadius:4, pointHoverRadius:6, tension:.25},
-        {label:'班上平均', data:mineD.map(x=>classD.get(x.d)), borderColor:'#9aa3b2', backgroundColor:'#9aa3b2', borderDash:[5,4], borderWidth:2, pointRadius:0, tension:.25},
-      ]}, options: baseOpts(k, unit) });
+      data:{ labels: pts.map(p => `${shortDate(p.r.date)} #${p.n}`), datasets:[
+        {label:'每一次成績', data:pts.map(p=>p.v), borderColor:SERIES[0], backgroundColor:SERIES[0], borderWidth:2,
+          pointRadius: pts.length>80 ? 2 : 4, pointHoverRadius:7, tension:0},
+        {label:'個人最佳紀錄', data:pts.map(p=>p.pb), borderColor:SERIES[1], backgroundColor:SERIES[1], borderWidth:2, stepped:true, pointRadius:0},
+        {label:'班上當天平均', data:pts.map(p=>classD.get(p.r.date)), borderColor:'#9aa3b2', backgroundColor:'#9aa3b2', borderDash:[5,4], borderWidth:2, pointRadius:0, stepped:'middle'},
+      ]}, options: opts });
   });
 }
 
@@ -774,10 +868,33 @@ $('#demoReset').onclick = async () => {
   Demo.db = Demo.seed(); Demo.save(); await reload(); renderManage(); toast('已重設示範資料');
 };
 
+/* ================= 安裝成 App（PWA） ================= */
+function setupApp(){
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  // 示範模式（預覽頁）不註冊；只有架在自己的網站上才啟用
+  if (!API.demo && 'serviceWorker' in navigator) {
+    try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch {}
+  }
+  if (standalone) return;
+  let deferred = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#installBtn').classList.remove('hidden'); });
+  window.addEventListener('appinstalled', () => { $('#installBtn').classList.add('hidden'); toast('✅ 已安裝，可以從主畫面打開'); });
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios && !API.demo) $('#installBtn').classList.remove('hidden');
+  $('#installBtn').onclick = async () => {
+    if (deferred) { deferred.prompt(); await deferred.userChoice.catch(() => {}); deferred = null; $('#installBtn').classList.add('hidden'); }
+    else $('#iosModal').classList.remove('hidden');
+  };
+  $('#iosClose').onclick = () => $('#iosModal').classList.add('hidden');
+}
+window.addEventListener('online', () => { if (API.offline) location.reload(); });
+
 /* ================= 啟動 ================= */
 (async () => {
   await API.init();
   if (API.demo) $('#demoBanner').classList.remove('hidden');
+  if (API.offline) $('#offlineBanner').classList.remove('hidden');
+  setupApp();
   try { await reload(); } catch (e) { toast('讀取資料失敗：' + e.message, true); }
   setRecMode(S.recMode);
   if (API.pin) await unlock(API.pin);
