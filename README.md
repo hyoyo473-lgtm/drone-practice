@@ -31,28 +31,41 @@
 
 ---
 
-## 二、第一次在 NAS 上架設
+## 二、運作方式
 
-### 1. 把程式從 GitHub 下載到 NAS
-
-用 SSH 登入 NAS（Synology 要先到「控制台 → 終端機和 SNMP」啟用 SSH），然後執行：
-
-```bash
-cd /volume1/docker
-git clone https://github.com/你的帳號/drone-practice.git
-cd drone-practice
+```
+修改程式 → push 到 GitHub → GitHub Actions 自動檢查＋打包映像檔 → NAS 下載新映像檔
 ```
 
-> 因為是 Private repository，`git clone` 時會要求登入。密碼欄要填 GitHub 的 **Personal Access Token**，不是 GitHub 的登入密碼。如果你前一個專案已經在 NAS 上設定好，用同樣的方式就可以。
+- 每次 push 到 `main`，GitHub 會自動檢查程式能不能正常啟動，通過後打包成映像檔 `ghcr.io/hyoyo473-lgtm/drone-practice:latest`。進度可以在 repository 的「Actions」分頁查看，大約 3～5 分鐘。
+- 其他人發 Pull Request 時，只會做檢查，不會發布。檢查沒過會顯示紅色 ❌。
+- **GitHub 不需要知道 NAS 的位址**，是 NAS 主動去下載映像檔。
 
-### 2. 建立 `.env` 設定檔
+---
 
-```bash
-cp .env.example .env
-vi .env        # 或用 File Station 打開編輯
-```
+## 三、第一次在 NAS 上架設
 
-把 `ADMIN_PIN` 改成你的管理密碼。如果 8080 跟其他網站撞到了，就把 `PORT` 改成別的數字，例如 8090。
+> 先確認 GitHub 的「Actions」分頁裡，第一次打包已經成功（綠色 ✅）。
+
+### 1. 建立資料夾和兩個檔案
+
+在 NAS 上建立 `/docker/drone-practice` 資料夾，然後在裡面放兩個檔案：
+
+- `docker-compose.yml`：從 GitHub 上複製這個檔案的內容即可。
+- `.env`：複製 `.env.example` 的內容，填入自己的管理密碼。如果 8080 跟其他網站撞到了，就把 `PORT` 改成別的數字。
+
+NAS 上**不需要**下載整份程式碼。
+
+### 2. 讓 NAS 可以下載映像檔
+
+Private repository 打包出來的映像檔，預設也是私人的。用以下任一種方式讓 NAS 可以下載，**跟前一個網站的做法相同即可**：
+
+- **方法 A：NAS 登入 GHCR**。先在 GitHub 建立一個只有 `read:packages` 權限的 Personal Access Token，然後在 NAS 的 SSH 執行：
+  ```bash
+  sudo docker login ghcr.io -u hyoyo473-lgtm
+  ```
+  密碼欄貼上 Token。
+- **方法 B：把映像檔設成公開**。到 GitHub 個人頁面 →「Packages」→ drone-practice →「Package settings」→ Change visibility → Public。映像檔裡只有程式碼，沒有密碼和學生資料，但任何人都能下載。
 
 ### 3. 在 Container Manager 建立專案
 
@@ -61,37 +74,31 @@ vi .env        # 或用 File Station 打開編輯
 - 路徑：選 `/docker/drone-practice`
 - 來源：選「使用現有的 docker-compose.yml」
 
-接著一路按下一步並建置。完成後，在校內用 `http://NAS的IP:8080` 打開網頁。上方**沒有**出現黃色的「示範模式」提示，就代表已經接上資料庫了。
+接著一路按下一步並建置。完成後，在校內用 `http://NAS的IP:8080` 打開網頁。上方**沒有**出現黃色的「示範模式」提示，就代表成功了。
 
 ### 4. 在原本的 Cloudflare Tunnel 新增網址
 
-到 Cloudflare Zero Trust →「Networks」→「Tunnels」，點原本那條 Tunnel →「Public Hostname」（新版介面叫「Published application routes」）→ 新增：
+到 Cloudflare Zero Trust →「Networks」→「Tunnels」，點原本那條 Tunnel →「Public Hostname」→ 新增：
 
 - Subdomain：`drone`
 - Domain：選你的網域
 - Type：`HTTP`
-- URL：`NAS的Tailscale IP:8080`（`100.x.x.x`，固定不會變）。如果連不到，就改填 NAS 的區網 IP。
-
-儲存後，就能用 `https://drone.你的網域.com` 連進來了。
+- URL：`NAS的Tailscale IP:8080`（`100.x.x.x`）。如果連不到，就改填 NAS 的區網 IP。
 
 ---
 
-## 三、之後修改內容的流程
+## 四、之後修改與更新
 
-```
-在電腦上修改 → commit → push 到 GitHub → NAS 上 git pull → Container Manager 重新建置
-```
+1. 修改程式後 push 到 GitHub（或合併其他老師的 Pull Request）。
+2. 等「Actions」分頁出現綠色 ✅。
+3. 在 NAS 上更新到新版。**用跟前一個網站相同的方式即可**，例如：
+   - Container Manager →「專案」→ drone-practice → 停止 →「動作」→「建置」（會重新下載 latest）
+   - 或在 SSH 執行：`cd /volume1/docker/drone-practice && sudo docker compose pull && sudo docker compose up -d`
+   - 或用 Watchtower 自動更新
 
-NAS 上的指令：
+更新**不會**影響學生資料。資料庫在 NAS 的 `data/` 資料夾，不在映像檔裡。
 
-```bash
-cd /volume1/docker/drone-practice
-git pull
-```
-
-拉完之後，到 Container Manager →「專案」→ drone-practice →「動作」→「建置」，或先「停止」再「建置」。
-
-更新程式**不會**影響學生資料。資料庫在 `data/` 資料夾，Git 不會去動它。
+**想在自己電腦上測試修改？** 在專案資料夾執行 `python3 server.py`，再打開 `http://localhost:8080`。這會在自己電腦上建立測試用的資料庫，不會碰到真正的學生資料。
 
 **常改的地方：**
 
@@ -104,7 +111,7 @@ git pull
 
 ---
 
-## 四、日常使用建議
+## 五、日常使用建議
 
 1. **第一次使用**：老師到「管理」頁，用密碼解鎖，先把學生名單、隊伍、主要位置（進攻／防守）建好。
 2. **練習時**：每位學生用手機打開網頁。記錄頁會記住上次選的學生，之後不用每次重新選。
@@ -114,7 +121,7 @@ git pull
 
 ---
 
-## 五、備份
+## 六、備份
 
 所有資料都在 `data/drone.db` 這一個檔案裡，**GitHub 上沒有這份資料**，所以要另外備份：
 
@@ -123,16 +130,19 @@ git pull
 
 ---
 
-## 六、常見問題
+## 七、常見問題
 
 **Q：Container Manager 建置時顯示「請先建立 .env 並設定 ADMIN_PIN」？**
-代表還沒有建立 `.env` 檔。請參考第二節的第 2 步。
+代表還沒有建立 `.env` 檔。請參考第三節的第 1 步。
+
+**Q：建置時顯示 denied 或 unauthorized？**
+代表 NAS 沒有權限下載映像檔。請參考第三節的第 2 步。
 
 **Q：網頁上方一直顯示「示範模式」？**
 代表網頁連不到後端。請確認你是透過 `http://NAS的IP:8080` 或你的網域打開網頁，而不是直接用瀏覽器打開 `index.html` 檔案。
 
 **Q：圖表沒有出現？**
-圖表元件（Chart.js）是從網路載入的。如果學校網路擋掉了外部網站，請下載下面這個檔案，放進 `static/` 資料夾，然後重新建置。網頁會自動改用本機的檔案。
+圖表元件（Chart.js）是從網路載入的。如果學校網路擋掉了外部網站，請下載下面這個檔案，放進 `static/` 資料夾，push 到 GitHub 後再更新 NAS。網頁會自動改用本機的檔案。
 
 `https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js`
 

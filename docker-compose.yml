@@ -1,7 +1,8 @@
-# 密碼和連接埠寫在同一資料夾的 .env 檔裡（參考 .env.example）
+# NAS 上只需要這個檔案 + .env，不用下載整份程式碼
+# 映像檔由 GitHub Actions 自動打包（見 .github/workflows/docker-publish.yml）
 services:
   drone-practice:
-    build: .
+    image: ghcr.io/hyoyo473-lgtm/drone-practice:latest
     container_name: drone-practice
     restart: unless-stopped
     environment:
