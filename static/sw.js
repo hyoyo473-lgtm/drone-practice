@@ -1,7 +1,7 @@
 /* 無人機練習紀錄 — Service Worker
  * 讓網站可以「安裝成 App」，並在沒網路時顯示上次讀到的成績。
  * 修改網頁後，把 VERSION 改一個數字，App 就會更新。 */
-const VERSION = 'v2';
+const VERSION = 'v4';  // 跟網頁最下方的版本號一起改
 const CACHE = 'drone-practice-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 

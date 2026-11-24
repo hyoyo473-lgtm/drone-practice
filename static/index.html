@@ -282,7 +282,7 @@ tr.me td{background:#eef5ff;font-weight:700}
       <h2>🔒 老師管理</h2>
       <p class="muted" style="margin-top:0">新增／修改學生、刪除紀錄需要老師管理密碼。學生只要用「記錄」頁就能登錄成績。</p>
       <div class="row">
-        <div class="field" style="max-width:220px"><label>管理密碼</label><input type="password" id="pinInput" inputmode="numeric" autocomplete="off"></div>
+        <div class="field" style="max-width:220px"><label>管理密碼</label><input type="password" id="pinInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
         <button class="btn" id="pinBtn">解鎖</button>
       </div>
     </div>
@@ -310,6 +310,7 @@ tr.me td{background:#eef5ff;font-weight:700}
       </div>
     </div>
   </section>
+  <footer style="text-align:center;color:var(--muted);font-size:12px;padding:8px 0 24px">網頁版本：<b id="appVersion">2026.11.24b</b></footer>
 </main>
 
 <div class="modal hidden" id="confirmModal"><div class="card">
