@@ -70,9 +70,42 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9ec5f4;border-color:v
 .spin button:disabled{opacity:.4;cursor:not-allowed}
 .spin select{min-height:44px;font-size:19px;font-weight:900;padding:4px 10px;font-variant-numeric:tabular-nums;border-radius:10px;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center;min-width:76px;cursor:pointer}
 .spin span{font-size:14px;color:var(--ink2);margin-right:2px}
-#limPreset{min-height:46px}
+.limiter > select{min-height:46px}
 .install-btn{margin-left:auto;background:#ffb13b;color:#13203a;border:0;border-radius:10px;padding:8px 14px;font-weight:900;cursor:pointer}
 .ios-steps{margin:8px 0 0;padding-left:20px;line-height:1.9}
+/* 學生點選按鈕 */
+.chips{display:flex;flex-wrap:wrap;gap:6px 14px}
+.chipgroup{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chipgroup .team{font-size:12px;color:var(--muted);font-weight:700;margin-right:2px}
+.chip{border:1.5px solid #cfd6e2;background:#fff;border-radius:99px;padding:7px 13px;font-weight:700;font-size:15px;cursor:pointer;min-height:38px;display:inline-flex;align-items:center;gap:4px}
+.chip small{font-size:11px;color:var(--muted);font-weight:500}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--navy2);border-color:var(--navy2);color:#fff}
+.chip.on small{color:#b8c3dc}
+/* 多個計時器 */
+.timers{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:14px}
+.tcard{margin:0;border-top:5px solid var(--mc)}
+.tc-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.tc-num{font-weight:900;font-size:16px}
+.tc-who{font-weight:700;color:var(--mc)}
+.tc-x{margin-left:auto;border:0;background:#f1f3f7;color:var(--ink2);width:34px;height:34px;border-radius:10px;font-size:16px;cursor:pointer}
+.tc-sec{margin-bottom:10px}
+.tc-lbl{font-size:12px;color:var(--ink2);font-weight:700;margin-bottom:5px}
+.mini-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mini-modes button{border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 4px;font-weight:700;cursor:pointer;font-size:14px}
+.mini-modes button.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,#fff);color:var(--ink)}
+.tcard .tool{margin-bottom:12px}
+.tcard .clock .t{font-size:48px}
+.tcard .counter .n{font-size:54px}
+.tcard .plus{padding:14px}
+.tc-mine{font-size:13px;color:var(--ink2);margin-top:8px}
+.add-row{margin:14px 0}
+.add-timer{width:100%;background:#fff;color:var(--navy2);border:2px dashed #b9c3d6;min-height:52px;font-size:16px}
+/* 全場即時紀錄 */
+.feed-best{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.feed-best div{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px}
+@keyframes flash{from{background:#fff3c4}to{background:transparent}}
+tr.new td{animation:flash 3s ease-out}
 /* tool */
 .tool{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
 .clock{background:var(--navy);color:#fff;border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:10px}
@@ -112,12 +145,18 @@ tr.me td{background:#eef5ff;font-weight:700}
 .modal{position:fixed;inset:0;background:rgba(10,15,30,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
 .modal .card{max-width:380px;width:100%;margin:0}
 @media (max-width:760px){
+  .timers{grid-template-columns:1fr}
+  .tcard .tool{grid-template-columns:1fr 1fr;gap:8px}
+  .tcard .clock{padding:10px}
+  .tcard .clock .t{font-size:38px}
+  .tcard .counter{padding:8px}
+  .tcard .counter .n{font-size:44px}
   .lim-label{width:100%}
   .limiter .spin{flex:1;justify-content:space-between;min-width:0}
   .spin{gap:4px}
   .spin button{width:38px;height:42px;flex:none}
   .spin select{font-size:17px;flex:1;min-width:0;padding:4px 2px}
-  #limPreset{width:100%}
+  .limiter > select{width:100%}
   .install-btn{padding:6px 10px;font-size:14px}
   .modes{grid-template-columns:1fr}
   .tool,.grid2{grid-template-columns:1fr}
@@ -148,97 +187,33 @@ tr.me td{background:#eef5ff;font-weight:700}
 
   <!-- ============ 記錄 ============ -->
   <section id="tab-record">
-    <div class="card">
-      <h2>1. 選擇學生與日期</h2>
-      <div class="row">
-        <div class="field"><label>學生</label><select id="recStudent"></select></div>
-        <div class="field"><label>日期</label><input type="date" id="recDate"></div>
+    <div class="card rec-top">
+      <div class="row" style="align-items:center">
+        <div class="field" style="max-width:190px;flex:0 0 auto"><label>練習日期</label><input type="date" id="recDate"></div>
+        <div class="muted" style="flex:1;min-width:220px">每個計時器各自選學生、模式和時間，各自計時、各自儲存。兩位同學同時練習時，按下方「＋ 新增計時器」。</div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>2. 選擇練習模式</h2>
-      <div class="modes" id="recModes"></div>
-    </div>
+    <div class="timers" id="timers"></div>
+    <div class="add-row"><button class="btn add-timer" id="addTimer">＋ 新增計時器</button></div>
 
-    <div class="card" id="toolCard">
-      <h2 id="toolTitle">3. 開始練習</h2>
-      <div id="limitRow" style="margin-bottom:12px">
-        <div class="limiter">
-          <div class="lim-label">限時</div>
-          <div class="spin" aria-label="分鐘">
-            <button type="button" data-step="-60" aria-label="減 1 分鐘">−</button>
-            <select id="limMin"></select>
-            <button type="button" data-step="60" aria-label="加 1 分鐘">＋</button>
-          </div>
-          <div class="spin" aria-label="秒">
-            <button type="button" data-step="-5" aria-label="減 5 秒">−</button>
-            <select id="limSec"></select>
-            <button type="button" data-step="5" aria-label="加 5 秒">＋</button>
-          </div>
-          <select id="limPreset" aria-label="快速選擇">
-            <option value="">⚡ 快速選擇</option>
-            <option value="30">30 秒</option><option value="60">1 分鐘</option><option value="90">1 分 30 秒</option>
-            <option value="120">2 分鐘（常用）</option><option value="150">2 分 30 秒</option>
-            <option value="180">3 分鐘</option><option value="300">5 分鐘</option>
-          </select>
-        </div>
-        <div class="muted" style="margin-top:8px">按「開始」倒數，每成功一次按大按鈕 +1。時間到會有提示音，次數會自動填入。秒數每次加減 5 秒。</div>
+    <div class="card" id="feedCard">
+      <h2>📡 全場即時紀錄 <span class="muted" id="feedDay" style="font-weight:400"></span></h2>
+      <div class="row" style="align-items:center;margin-bottom:10px">
+        <div class="seg" id="feedMode"></div>
+        <div class="muted" id="feedStatus" style="flex:1;min-width:160px"></div>
+        <button class="btn light small" id="feedRefresh">🔄 立即更新</button>
       </div>
-
-      <!-- 計數模式 -->
-      <div class="tool" id="countTool">
-        <div class="clock" id="cdClock">
-          <div class="lbl">剩餘時間</div>
-          <div class="t" id="cdTime">1:00</div>
-          <div class="btns">
-            <button class="btn light" id="cdStart">▶ 開始</button>
-            <button class="btn light" id="cdReset">↺ 重設</button>
-          </div>
-        </div>
-        <div class="counter">
-          <div class="lbl muted" id="countLbl">成功次數</div>
-          <div class="n" id="countN">0</div>
-          <button class="plus" id="countPlus">＋1</button>
-          <div class="btns"><button class="btn light small" id="countMinus">－1 修正</button></div>
-        </div>
-      </div>
-
-      <!-- 守門碼錶 -->
-      <div class="tool hidden" id="keepTool">
-        <div class="clock" id="swClock">
-          <div class="lbl">連續守住時間</div>
-          <div class="t" id="swTime">0:00.0</div>
-          <div class="lbl" id="swHint">對方開始進攻時按「開始」</div>
-        </div>
-        <div class="counter">
-          <button class="plus" id="swStart">▶ 開始守門</button>
-          <button class="plus" id="swStop" style="background:var(--bad)" disabled>✋ 失守（停止）</button>
-          <div class="btns"><button class="btn light small" id="swReset">↺ 重設</button></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>4. 確認成績並儲存</h2>
-      <div class="row">
-        <div class="field" style="max-width:200px"><label id="valLbl">成功次數</label><input type="number" id="recValue" min="0" step="1" inputmode="decimal"></div>
-        <div class="field" style="flex:3"><label>備註（選填）</label><input type="text" id="recNote" maxlength="200" placeholder="例如：風大、換新電池、對手是誰…"></div>
-        <button class="btn" id="recSave" style="min-width:120px">💾 儲存</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>今天的紀錄 <span class="muted" id="todayWho"></span></h2>
-      <div id="todayList"></div>
+      <div id="feedBest" class="feed-best"></div>
+      <div id="feedList"></div>
     </div>
   </section>
 
   <!-- ============ 我的進步 ============ -->
   <section id="tab-progress" class="hidden">
     <div class="card">
+      <div class="field" style="margin-bottom:12px"><label>學生</label><div class="chips" id="pgChips"></div></div>
       <div class="row">
-        <div class="field" style="max-width:260px"><label>學生</label><select id="pgStudent"></select></div>
         <div class="field" style="flex:0 0 auto;min-width:0"><label>期間</label><div class="seg" id="pgRange"></div></div>
         <div class="field" style="flex:0 0 auto;min-width:0"><label>進攻／追球的計算方式</label><div class="seg" id="pgUnit"></div></div>
       </div>
@@ -258,8 +233,8 @@ tr.me td{background:#eef5ff;font-weight:700}
       <div class="row" style="margin-top:10px">
         <div class="field" style="max-width:200px"><label>位置</label><select id="cmpRole"><option value="">全部</option><option value="進攻">進攻手</option><option value="防守">防守手</option></select></div>
         <div class="field" style="max-width:200px"><label>隊伍</label><select id="cmpTeam"><option value="">全部</option></select></div>
-        <div class="field" style="max-width:220px"><label>標示自己</label><select id="cmpMe"><option value="">（不標示）</option></select></div>
       </div>
+      <div class="field" style="margin-top:10px"><label>標示自己</label><div class="chips" id="cmpChips"></div></div>
     </div>
     <div class="card">
       <h2 id="cmpTitle">排行榜</h2>
@@ -301,16 +276,16 @@ tr.me td{background:#eef5ff;font-weight:700}
       <div class="card">
         <h2>🗂 所有紀錄</h2>
         <div class="row" style="margin-bottom:12px">
-          <div class="field" style="max-width:220px"><label>學生</label><select id="rlStudent"><option value="">全部</option></select></div>
           <div class="field" style="max-width:200px"><label>模式</label><select id="rlMode"><option value="">全部</option><option value="attack">進攻</option><option value="chase">防守追球</option><option value="keeper">防守守門</option></select></div>
           <button class="btn light" id="exportBtn">⬇ 匯出 CSV（Excel 可開）</button>
           <button class="btn danger hidden" id="demoReset">清除示範資料</button>
         </div>
+        <div class="field" style="margin-bottom:12px"><label>學生</label><div class="chips" id="rlChips"></div></div>
         <div class="tablewrap" id="rlTable"></div>
       </div>
     </div>
   </section>
-  <footer style="text-align:center;color:var(--muted);font-size:12px;padding:8px 0 24px">網頁版本：<b id="appVersion">2026.11.24b</b></footer>
+  <footer style="text-align:center;color:var(--muted);font-size:12px;padding:8px 0 24px">網頁版本：<b id="appVersion">2026.11.25</b></footer>
 </main>
 
 <div class="modal hidden" id="confirmModal"><div class="card">
@@ -431,11 +406,12 @@ const Demo = {
         const tries = 1 + Math.floor(rnd()*2);
         for (let t=0;t<tries;t++){
           const main = s.role === '進攻';
-          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'attack', time_limit:60,
+          const ca = daysAgo(d) + ` ${pad(14 + t)}:${pad(Math.floor(rnd()*60))}:00`;
+          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'attack', time_limit:60, created_at:ca,
             value: Math.max(0, Math.round((main?4:2)*skill + p*grow*(main?4:2) + (rnd()-.5)*3)), note:''});
-          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'chase', time_limit:60,
+          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'chase', time_limit:60, created_at:ca,
             value: Math.max(0, Math.round((main?2:3)*skill + p*grow*3 + (rnd()-.5)*2)), note:''});
-          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'keeper', time_limit:null,
+          records.push({id:id++, student_id:s.id, date:daysAgo(d), mode:'keeper', time_limit:null, created_at:ca,
             value: Math.max(2, Math.round(((main?15:25)*skill + p*grow*(main?20:40) + (rnd()-.5)*14)*10)/10), note:''});
         }
       });
@@ -462,7 +438,8 @@ const Demo = {
       else if (method === 'POST') {
         if (!body.student_id || body.value === '' || body.value == null || isNaN(body.value)) throw new Error('請選學生並輸入成績');
         db.records.push({id:db.nextR, student_id:+body.student_id, date:body.date, mode:body.mode, value:+body.value,
-          time_limit: body.mode==='keeper' ? null : +body.time_limit, note:body.note||''}); out = {id:db.nextR++};
+          time_limit: body.mode==='keeper' ? null : +body.time_limit, note:body.note||'', created_at: (() => { const n = new Date();
+            return `${ymd(n)} ${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`; })()}); out = {id:db.nextR++};
       } else if (method === 'DELETE') { needPin(); db.records = db.records.filter(r => r.id!==id); out = {ok:true}; }
     }
     this.save(); return out;
@@ -473,7 +450,7 @@ const Demo = {
 const S = {
   students: [], records: [],
   tab: 'record',
-  recMode: store.get('recMode','attack'),
+  pgSid: +store.get('me', 0) || 0, cmpMe: +store.get('me', 0) || 0, rlSid: 0,
   pgRange: 'all', pgUnit: 'raw',
   cmpMode: 'attack', cmpRange: '30', cmpMetric: 'best', cmpUnit: 'raw',
   charts: {},
@@ -487,13 +464,17 @@ const activeStudents = () => S.students.filter(s => +s.active);
 const studentName = id => (S.students.find(s => s.id===+id)||{}).name || '?';
 
 function fillStudentSelects(){
-  const opts = activeStudents().map(s => `<option value="${s.id}">${esc(s.name)}${s.team?'（'+esc(s.team)+'）':''}</option>`).join('');
-  const keep = (sel, prefix='', key) => { const el = $(sel); const v = el.value || (key ? String(store.get(key,'')) : '');
-    el.innerHTML = prefix + opts; if ([...el.options].some(o => o.value===v)) el.value = v; };
-  keep('#recStudent', '<option value="">— 請選擇 —</option>', 'me');
-  keep('#pgStudent', '', 'me');
-  keep('#cmpMe', '<option value="">（不標示）</option>', 'me');
-  keep('#rlStudent', '<option value="">全部</option>');
+  const act = activeStudents(), ok = id => act.some(s => s.id === id);
+  if (!ok(S.pgSid)) S.pgSid = act.length ? act[0].id : 0;
+  if (S.cmpMe && !ok(S.cmpMe)) S.cmpMe = 0;
+  if (S.rlSid && !ok(S.rlSid)) S.rlSid = 0;
+  $('#pgChips').innerHTML = chipsHTML(S.pgSid);
+  bindChips($('#pgChips'), sid => { S.pgSid = sid; store.set('me', sid); renderProgress(); });
+  $('#cmpChips').innerHTML = chipsHTML(S.cmpMe, '（不標示）');
+  bindChips($('#cmpChips'), sid => { S.cmpMe = sid; if (sid) store.set('me', sid); renderCompare(); });
+  $('#rlChips').innerHTML = chipsHTML(S.rlSid, '全部');
+  bindChips($('#rlChips'), sid => { S.rlSid = sid; renderManage(); });
+  TIMERS.forEach(t => t.drawChips());
   const teams = [...new Set(S.students.map(s => s.team).filter(Boolean))];
   const ct = $('#cmpTeam'), cv = ct.value;
   ct.innerHTML = '<option value="">全部</option>' + teams.map(t => `<option>${esc(t)}</option>`).join(''); ct.value = cv;
@@ -506,35 +487,32 @@ function showTab(t){
   S.tab = t;
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab===t));
   ['record','progress','compare','manage'].forEach(x => $('#tab-'+x).classList.toggle('hidden', x!==t));
-  if (t==='record') renderToday();
+  if (t==='record') { renderFeed(); TIMERS.forEach(x => x.drawMine()); }
   if (t==='progress') renderProgress();
   if (t==='compare') renderCompare();
   if (t==='manage') renderManage();
   try { history.replaceState(null,'','#'+t); } catch {}
 }
 
+/* ================= 學生點選按鈕（每個頁面共用） ================= */
+function chipsHTML(sel, none){
+  const studs = activeStudents();
+  if (!studs.length) return '<span class="muted">還沒有學生，請老師到「管理」頁新增</span>';
+  const groups = new Map();
+  studs.forEach(s => { const t = s.team || ''; if (!groups.has(t)) groups.set(t, []); groups.get(t).push(s); });
+  let h = none ? `<div class="chipgroup"><button class="chip ${sel ? '' : 'on'}" data-sid="">${none}</button></div>` : '';
+  for (const [t, arr] of groups) h += `<div class="chipgroup">${t ? `<span class="team">${esc(t)}</span>` : ''}${
+    arr.map(s => `<button class="chip ${s.id===sel ? 'on' : ''}" data-sid="${s.id}">${esc(s.name)}${s.role ? `<small>${s.role==='進攻'?'攻':'守'}</small>` : ''}</button>`).join('')}</div>`;
+  return h;
+}
+function bindChips(el, onPick){
+  el.onclick = e => { const b = e.target.closest('.chip'); if (!b) return;
+    el.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); onPick(b.dataset.sid ? +b.dataset.sid : 0); };
+}
+
 /* ================= 記錄頁 ================= */
 $('#recDate').value = today();
-$('#recModes').innerHTML = Object.entries(MODES).map(([k,m]) =>
-  `<button class="mode" data-m="${k}" style="--mc:${m.color}"><b><span class="dot" style="background:${m.color}"></span>${m.name}</b><span>${m.desc}</span></button>`).join('');
-$('#recModes').onclick = e => { const b = e.target.closest('.mode'); if (b) setRecMode(b.dataset.m); };
-$('#recStudent').onchange = e => { store.set('me', e.target.value); renderToday(); };
-
-function setRecMode(m){
-  if (timer.running || sw.running) { toast('請先停止計時', true); return; }
-  S.recMode = m; store.set('recMode', m);
-  const M = MODES[m];
-  document.querySelectorAll('#recModes .mode').forEach(b => b.classList.toggle('on', b.dataset.m===m));
-  $('#toolCard').style.setProperty('--mc', M.color);
-  $('#countTool').classList.toggle('hidden', !M.timed);
-  $('#limitRow').classList.toggle('hidden', !M.timed);
-  $('#keepTool').classList.toggle('hidden', M.timed);
-  $('#toolTitle').textContent = '3. ' + M.name + (M.timed ? '：倒數計時＋計數' : '：碼錶計時');
-  $('#countLbl').textContent = M.countLbl;
-  $('#valLbl').textContent = M.timed ? M.countLbl : '守住時間（秒）';
-  $('#recValue').step = M.timed ? '1' : '0.1';
-  resetCount(); resetSw(); $('#recValue').value = '';
-}
+$('#recDate').onchange = () => TIMERS.forEach(t => t.drawMine());
 
 /* 提示音（使用者按下按鈕後才能播放） */
 let actx;
@@ -550,117 +528,247 @@ function beep(freq=880, dur=.25, times=1){
   } catch {}
   try { navigator.vibrate && navigator.vibrate(200*times); } catch {}
 }
-
-/* 倒數計時 + 計數 */
-const timer = {running:false, left:60, end:0, id:0};
-let count = 0;
 const fmtClock = s => `${Math.floor(s/60)}:${pad(Math.floor(s%60))}`;
-/* 限時：分、秒都可加減，也可下拉快速選擇；會記住上次的設定（預設 2 分鐘） */
-const LIM_MIN = 5, LIM_MAX = 15*60;
-let limit = Math.min(LIM_MAX, Math.max(LIM_MIN, +store.get('limit', 120) || 120));
-$('#limMin').innerHTML = Array.from({length:16}, (_,i) => `<option value="${i}">${i} 分</option>`).join('');
-$('#limSec').innerHTML = Array.from({length:12}, (_,i) => `<option value="${i*5}">${pad(i*5)} 秒</option>`).join('');
-function limitSec(){ return limit; }
-function setLimit(sec){
-  if (timer.running) { toast('倒數中不能改時間，請先暫停並重設', true); drawLimit(); return; }
-  limit = Math.min(LIM_MAX, Math.max(LIM_MIN, Math.round(sec/5)*5));
-  store.set('limit', limit); resetCount();
-}
-function drawLimit(){
-  $('#limMin').value = Math.floor(limit/60);
-  $('#limSec').value = limit % 60;
-  $('#limPreset').value = [...$('#limPreset').options].some(o => +o.value === limit) ? String(limit) : '';
-  document.querySelectorAll('#limitRow .spin button').forEach(b => {
-    const n = limit + +b.dataset.step; b.disabled = timer.running || n < LIM_MIN || n > LIM_MAX; });
-  $('#limMin').disabled = $('#limSec').disabled = $('#limPreset').disabled = timer.running;
-}
-$('#limitRow').addEventListener('click', e => { const b = e.target.closest('button[data-step]'); if (b) setLimit(limit + +b.dataset.step); });
-$('#limMin').onchange = () => setLimit(+$('#limMin').value*60 + +$('#limSec').value);
-$('#limSec').onchange = () => setLimit(+$('#limMin').value*60 + +$('#limSec').value);
-$('#limPreset').onchange = e => { if (e.target.value) setLimit(+e.target.value); };
-function drawCd(){
-  $('#cdTime').textContent = fmtClock(Math.ceil(timer.left));
-  $('#cdClock').className = 'clock' + (timer.running ? ' run' : timer.left<=0 ? ' done' : '');
-  $('#cdStart').textContent = timer.running ? '⏸ 暫停' : (timer.left < limitSec() && timer.left > 0 ? '▶ 繼續' : '▶ 開始');
-  drawLimit();
-}
-function resetCount(){
-  clearInterval(timer.id); timer.running = false; timer.left = limitSec(); count = 0;
-  $('#countN').textContent = 0; $('#countPlus').disabled = false; drawCd();
-}
-$('#cdStart').onclick = () => {
-  if (timer.running) { clearInterval(timer.id); timer.running = false; drawCd(); return; }
-  if (timer.left <= 0) resetCount();
-  beep(660,.12);
-  timer.running = true; timer.end = performance.now() + timer.left*1000;
-  let lastWarn = 99;
-  timer.id = setInterval(() => {
-    timer.left = Math.max(0, (timer.end - performance.now())/1000);
-    const c = Math.ceil(timer.left);
-    if (c <= 3 && c > 0 && c < lastWarn) { lastWarn = c; beep(520,.08); }
-    if (timer.left <= 0) { clearInterval(timer.id); timer.running = false; beep(988,.35,3);
-      $('#recValue').value = count; toast(`時間到！共 ${count} 次，已填入成績`); }
-    drawCd();
-  }, 100);
-  drawCd();
-};
-$('#cdReset').onclick = resetCount;
-function bump(d){
-  if (timer.left <= 0 && d > 0) { toast('時間已到，請按重設', true); return; }
-  count = Math.max(0, count + d); $('#countN').textContent = count; $('#recValue').value = count;
-}
-$('#countPlus').onclick = () => bump(1);
-$('#countMinus').onclick = () => bump(-1);
-
-/* 守門碼錶 */
-const sw = {running:false, start:0, elapsed:0, id:0};
 const fmtSw = s => `${Math.floor(s/60)}:${pad(Math.floor(s%60))}.${Math.floor((s*10)%10)}`;
-function drawSw(){
-  $('#swTime').textContent = fmtSw(sw.elapsed);
-  $('#swClock').className = 'clock' + (sw.running ? ' run' : sw.elapsed>0 ? ' done' : '');
-  $('#swStart').disabled = sw.running; $('#swStop').disabled = !sw.running;
-  $('#swHint').textContent = sw.running ? '守住中…被進球時按「失守」' : sw.elapsed>0 ? '已停止，成績已填入' : '對方開始進攻時按「開始」';
-}
-function resetSw(){ clearInterval(sw.id); sw.running=false; sw.elapsed=0; drawSw(); }
-$('#swStart').onclick = () => {
-  beep(660,.12); sw.running = true; sw.elapsed = 0; sw.start = performance.now();
-  sw.id = setInterval(() => { sw.elapsed = (performance.now()-sw.start)/1000; drawSw(); }, 100); drawSw();
-};
-$('#swStop').onclick = () => {
-  clearInterval(sw.id); sw.elapsed = (performance.now()-sw.start)/1000; sw.running = false; beep(330,.4);
-  $('#recValue').value = sw.elapsed.toFixed(1); drawSw(); toast(`守住 ${fmtSec(sw.elapsed)}，已填入成績`);
-};
-$('#swReset').onclick = resetSw;
+const LIM_MIN = 5, LIM_MAX = 15*60;
+const clampLim = v => { v = Number(v); if (!Number.isFinite(v)) v = 120; return Math.min(LIM_MAX, Math.max(LIM_MIN, Math.round(v/5)*5)); };
+const PRESETS = [[30,'30 秒'],[60,'1 分鐘'],[90,'1 分 30 秒'],[120,'2 分鐘（常用）'],[150,'2 分 30 秒'],[180,'3 分鐘'],[300,'5 分鐘']];
 
-$('#recSave').onclick = async () => {
-  const sid = $('#recStudent').value, v = $('#recValue').value, m = S.recMode;
-  if (!sid) return toast('請先選擇學生', true);
-  if (v === '' || isNaN(v) || +v < 0) return toast('請輸入成績', true);
-  if (timer.running || sw.running) return toast('計時還在進行中', true);
-  $('#recSave').disabled = true;
+/* 每一個計時器是一張卡片：各自的學生、模式、限時、計時與儲存 */
+const TIMERS = [];
+function saveTimerCfg(){ store.set('timers', TIMERS.map(t => ({sid:t.sid, mode:t.mode, limit:t.limit}))); }
+const TPL = `
+  <div class="tc-head"><span class="tc-num"></span><span class="tc-who"></span><button class="tc-x" data-a="remove" title="刪除這個計時器">✕</button></div>
+  <div class="tc-sec"><div class="tc-lbl">學生</div><div class="chips" data-k="chips"></div></div>
+  <div class="tc-sec"><div class="tc-lbl">模式</div><div class="mini-modes" data-k="modes">${
+    Object.entries(MODES).map(([k,m]) => `<button data-m="${k}" style="--c:${m.color}" title="${m.desc}">${m.name}</button>`).join('')}</div></div>
+  <div class="tc-sec" data-k="limrow"><div class="limiter">
+    <div class="spin"><button type="button" data-a="step" data-step="-60" aria-label="減 1 分鐘">−</button>
+      <select data-k="min">${Array.from({length:16},(_,i)=>`<option value="${i}">${i} 分</option>`).join('')}</select>
+      <button type="button" data-a="step" data-step="60" aria-label="加 1 分鐘">＋</button></div>
+    <div class="spin"><button type="button" data-a="step" data-step="-5" aria-label="減 5 秒">−</button>
+      <select data-k="sec">${Array.from({length:12},(_,i)=>`<option value="${i*5}">${pad(i*5)} 秒</option>`).join('')}</select>
+      <button type="button" data-a="step" data-step="5" aria-label="加 5 秒">＋</button></div>
+    <select data-k="preset" aria-label="快速選擇"><option value="">⚡ 快速選擇</option>${PRESETS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select>
+  </div></div>
+  <div class="tool" data-k="count">
+    <div class="clock" data-k="cdclock"><div class="lbl">剩餘時間</div><div class="t" data-k="cdtime"></div>
+      <div class="btns"><button class="btn light" data-a="cdstart"></button><button class="btn light" data-a="cdreset">↺ 重設</button></div></div>
+    <div class="counter"><div class="lbl muted" data-k="clbl"></div><div class="n" data-k="n">0</div>
+      <button class="plus" data-a="plus">＋1</button><div class="btns"><button class="btn light small" data-a="minus">－1 修正</button></div></div>
+  </div>
+  <div class="tool" data-k="keep">
+    <div class="clock" data-k="swclock"><div class="lbl">連續守住時間</div><div class="t" data-k="swtime">0:00.0</div><div class="lbl" data-k="swhint"></div></div>
+    <div class="counter"><button class="plus" data-a="swstart">▶ 開始守門</button>
+      <button class="plus" style="background:var(--bad)" data-a="swstop">✋ 失守</button>
+      <div class="btns"><button class="btn light small" data-a="swreset">↺ 重設</button></div></div>
+  </div>
+  <div class="row">
+    <div class="field" style="max-width:150px;min-width:110px"><label data-k="vlbl"></label><input type="number" data-k="value" min="0" inputmode="decimal"></div>
+    <div class="field" style="flex:3;min-width:150px"><label>備註（選填）</label><input type="text" data-k="note" maxlength="200" placeholder="例如：風大、換新電池…"></div>
+    <button class="btn" data-a="save" style="min-width:100px">💾 儲存</button>
+  </div>
+  <div class="tc-mine" data-k="mine"></div>`;
+
+class Timer {
+  constructor(cfg = {}){
+    this.sid = cfg.sid || 0; this.mode = MODES[cfg.mode] ? cfg.mode : 'attack'; this.limit = clampLim(cfg.limit || 120);
+    this.count = 0; this.left = this.limit; this.running = false; this.end = 0; this.iv = 0;
+    this.swRun = false; this.swStart = 0; this.swEl = 0; this.swIv = 0;
+    this.el = document.createElement('div'); this.el.className = 'card tcard'; this.el.innerHTML = TPL;
+    this.el.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b && !b.disabled) this.act(b.dataset.a, b); });
+    this.el.addEventListener('change', e => {
+      const k = e.target.dataset.k;
+      if (k === 'min' || k === 'sec') this.setLimit(+this.q('min').value*60 + +this.q('sec').value);
+      if (k === 'preset' && e.target.value) this.setLimit(+e.target.value);
+    });
+    this.q('modes').onclick = e => { const b = e.target.closest('[data-m]'); if (b) this.setMode(b.dataset.m); };
+    this.drawChips(); this.setMode(this.mode, true);
+  }
+  q(k){ return this.el.querySelector(`[data-k="${k}"]`); }
+  busy(){ return this.running || this.swRun; }
+  drawChips(){
+    if (this.sid && !activeStudents().some(s => s.id === this.sid)) this.sid = 0;
+    this.q('chips').innerHTML = chipsHTML(this.sid);
+    bindChips(this.q('chips'), sid => { this.sid = sid; saveTimerCfg(); this.drawHead(); this.drawMine(); });
+    this.drawHead(); this.drawMine();
+  }
+  drawHead(){
+    const i = TIMERS.indexOf(this);
+    this.el.querySelector('.tc-num').textContent = `⏱ 計時器 ${i < 0 ? TIMERS.length + 1 : i + 1}`;
+    this.el.querySelector('.tc-who').textContent = this.sid ? `${studentName(this.sid)}・${MODES[this.mode].name}` : MODES[this.mode].name;
+    this.el.querySelector('.tc-x').style.visibility = TIMERS.length > 1 ? 'visible' : 'hidden';
+  }
+  setMode(m, init){
+    if (!init && this.busy()) { toast('請先停止這個計時器', true); return; }
+    this.mode = m; const M = MODES[m];
+    this.el.style.setProperty('--mc', M.color);
+    this.q('modes').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    this.q('limrow').classList.toggle('hidden', !M.timed);
+    this.q('count').classList.toggle('hidden', !M.timed);
+    this.q('keep').classList.toggle('hidden', M.timed);
+    this.q('clbl').textContent = M.countLbl;
+    this.q('vlbl').textContent = M.timed ? M.countLbl : '守住秒數';
+    this.q('value').step = M.timed ? '1' : '0.1';
+    this.q('value').value = '';
+    this.resetCount(); this.resetSw();
+    if (!init) saveTimerCfg();
+    this.drawHead(); this.drawMine();
+  }
+  setLimit(sec){
+    if (this.running) { toast('倒數中不能改時間', true); this.drawLimit(); return; }
+    this.limit = clampLim(sec); saveTimerCfg(); this.resetCount();
+  }
+  drawLimit(){
+    this.q('min').value = Math.floor(this.limit/60); this.q('sec').value = this.limit % 60;
+    this.q('preset').value = PRESETS.some(([v]) => v === this.limit) ? String(this.limit) : '';
+    this.el.querySelectorAll('[data-a="step"]').forEach(b => { const n = this.limit + +b.dataset.step;
+      b.disabled = this.running || n < LIM_MIN || n > LIM_MAX; });
+    this.q('min').disabled = this.q('sec').disabled = this.q('preset').disabled = this.running;
+  }
+  drawCd(){
+    this.q('cdtime').textContent = fmtClock(Math.ceil(this.left));
+    this.q('cdclock').className = 'clock' + (this.running ? ' run' : this.left <= 0 ? ' done' : '');
+    this.el.querySelector('[data-a="cdstart"]').textContent = this.running ? '⏸ 暫停' : (this.left < this.limit && this.left > 0 ? '▶ 繼續' : '▶ 開始');
+    this.drawLimit();
+  }
+  resetCount(){ clearInterval(this.iv); this.running = false; this.left = this.limit; this.count = 0; this.q('n').textContent = 0; this.drawCd(); }
+  startCd(){
+    if (this.running) { clearInterval(this.iv); this.running = false; this.drawCd(); return; }
+    if (this.left <= 0) this.resetCount();
+    beep(660,.12); this.running = true; this.end = performance.now() + this.left*1000;
+    let warn = 99;
+    this.iv = setInterval(() => {
+      this.left = Math.max(0, (this.end - performance.now())/1000);
+      const c = Math.ceil(this.left);
+      if (c <= 3 && c > 0 && c < warn) { warn = c; beep(520,.08); }
+      if (this.left <= 0) { clearInterval(this.iv); this.running = false; beep(988,.35,3);
+        this.q('value').value = this.count;
+        toast(`${this.label()}時間到！共 ${this.count} 次，已填入成績`); }
+      this.drawCd();
+    }, 100);
+    this.drawCd();
+  }
+  bump(d){
+    if (this.left <= 0 && d > 0) { toast('時間已到，請按重設', true); return; }
+    this.count = Math.max(0, this.count + d); this.q('n').textContent = this.count; this.q('value').value = this.count;
+  }
+  drawSw(){
+    this.q('swtime').textContent = fmtSw(this.swEl);
+    this.q('swclock').className = 'clock' + (this.swRun ? ' run' : this.swEl > 0 ? ' done' : '');
+    this.el.querySelector('[data-a="swstart"]').disabled = this.swRun;
+    this.el.querySelector('[data-a="swstop"]').disabled = !this.swRun;
+    this.q('swhint').textContent = this.swRun ? '守住中…被進球時按「失守」' : this.swEl > 0 ? '已停止，成績已填入' : '對方開始進攻時按「開始」';
+  }
+  resetSw(){ clearInterval(this.swIv); this.swRun = false; this.swEl = 0; this.drawSw(); }
+  label(){ return this.sid ? studentName(this.sid) + ' ' : ''; }
+  async act(a, b){
+    if (a === 'cdstart') this.startCd();
+    else if (a === 'cdreset') this.resetCount();
+    else if (a === 'plus') this.bump(1);
+    else if (a === 'minus') this.bump(-1);
+    else if (a === 'step') this.setLimit(this.limit + +b.dataset.step);
+    else if (a === 'swstart') { beep(660,.12); this.swRun = true; this.swEl = 0; this.swStart = performance.now();
+      this.swIv = setInterval(() => { this.swEl = (performance.now() - this.swStart)/1000; this.drawSw(); }, 100); this.drawSw(); }
+    else if (a === 'swstop') { clearInterval(this.swIv); this.swEl = (performance.now() - this.swStart)/1000; this.swRun = false; beep(330,.4);
+      this.q('value').value = this.swEl.toFixed(1); this.drawSw(); toast(`${this.label()}守住 ${fmtSec(this.swEl)}，已填入成績`); }
+    else if (a === 'swreset') this.resetSw();
+    else if (a === 'save') this.save();
+    else if (a === 'remove') {
+      if (this.busy() && !await confirmBox('這個計時器還在計時，確定要刪除嗎？')) return;
+      clearInterval(this.iv); clearInterval(this.swIv);
+      TIMERS.splice(TIMERS.indexOf(this), 1); this.el.remove(); saveTimerCfg(); TIMERS.forEach(t => t.drawHead());
+    }
+  }
+  async save(){
+    const v = this.q('value').value, m = this.mode, sid = this.sid;
+    if (!sid) return toast('請先點選學生', true);
+    if (v === '' || isNaN(v) || +v < 0) return toast('請輸入成績', true);
+    if (this.busy()) return toast('計時還在進行中', true);
+    const btn = this.el.querySelector('[data-a="save"]'); btn.disabled = true;
+    try {
+      await API.req('POST','records', {student_id:sid, date:$('#recDate').value || today(), mode:m, value:+v,
+        time_limit: MODES[m].timed ? this.limit : null, note:this.q('note').value});
+      await reload();
+      const best = Math.max(...S.records.filter(r => r.student_id===sid && r.mode===m && (m==='keeper' || r.time_limit===this.limit)).map(r => r.value));
+      toast(+v >= best ? `🎉 ${studentName(sid)} 已儲存，這是個人最佳紀錄！` : `✅ ${studentName(sid)} 已儲存`);
+      this.q('value').value = ''; this.q('note').value = '';
+      MODES[m].timed ? this.resetCount() : this.resetSw();
+      renderFeed();
+    } catch (e) { toast(e.message, true); }
+    btn.disabled = false;
+  }
+  drawMine(){
+    const box = this.q('mine'), d = $('#recDate').value;
+    if (!this.sid) { box.textContent = ''; return; }
+    const rs = S.records.filter(r => r.student_id===this.sid && r.mode===this.mode && r.date===d);
+    box.innerHTML = rs.length ? `${esc(studentName(this.sid))} 這天的${MODES[this.mode].name}：${rs.map(r => fmtVal(r.mode, r.value).replace(/ /g,'')).join('、')}` : '';
+  }
+}
+function addTimer(cfg){
+  if (!cfg) { const last = TIMERS[TIMERS.length-1]; cfg = last ? {mode:last.mode, limit:last.limit} : {}; }
+  const t = new Timer(cfg); TIMERS.push(t); $('#timers').appendChild(t.el); TIMERS.forEach(x => x.drawHead()); saveTimerCfg(); return t;
+}
+$('#addTimer').onclick = () => { const t = addTimer(); t.el.scrollIntoView({behavior:'smooth', block:'start'}); };
+function initTimers(){
+  const cfgs = store.get('timers', null);
+  (Array.isArray(cfgs) && cfgs.length ? cfgs : [{mode: store.get('recMode','attack'), limit: store.get('limit',120)}]).slice(0, 8).forEach(c => addTimer(c));
+}
+
+/* ================= 全場即時紀錄 ================= */
+const Feed = {mode:'', seen:null, iv:0, last:null};
+seg($('#feedMode'), [['','全部'], ...Object.entries(MODES).map(([k,m]) => [k, m.name])], '', v => { Feed.mode = v; renderFeed(); });
+const WEEK = '日一二三四五六';
+function feedDay(){ let max = ''; for (const r of S.records) if (r.date > max) max = r.date; return max; }
+function renderFeed(){
+  const day = feedDay();
+  if (!day) { $('#feedDay').textContent = ''; $('#feedBest').innerHTML = ''; $('#feedList').innerHTML = '<div class="empty">還沒有任何紀錄</div>'; return; }
+  const wd = WEEK[new Date(day + 'T00:00').getDay()];
+  $('#feedDay').textContent = `— ${shortDate(day)}（${wd}）` + (day === today() ? '・今天' : '・今天還沒有新的登記，先顯示最近一天');
+  const dayRs = S.records.filter(r => r.date === day);
+  // 每個模式今天的最佳
+  $('#feedBest').innerHTML = Object.entries(MODES).map(([k,M]) => {
+    const rs = dayRs.filter(r => r.mode === k); if (!rs.length) return '';
+    const b = rs.reduce((a,r) => score(r,'rate') > score(a,'rate') ? r : a);
+    return `<div><span class="tag ${k}">${M.name}</span> ${rs.length} 筆・最佳 <b>${esc(studentName(b.student_id))}</b> ${fmtVal(k, b.value)}${b.time_limit ? '／' + fmtClock(b.time_limit) : ''}</div>`;
+  }).join('');
+  const rs = dayRs.filter(r => !Feed.mode || r.mode === Feed.mode).sort((a,b) => (b.created_at||'').localeCompare(a.created_at||'') || b.id - a.id);
+  const fresh = Feed.seen ? new Set(rs.filter(r => !Feed.seen.has(r.id)).map(r => r.id)) : new Set();
+  Feed.seen = new Set(dayRs.map(r => r.id));
+  $('#feedList').innerHTML = rs.length ? `<div class="tablewrap"><table><tr><th>時間</th><th>學生</th><th>模式</th><th class="num">成績</th><th>限時</th><th>備註</th></tr>${
+    rs.map(r => `<tr class="${fresh.has(r.id) ? 'new' : ''}"><td>${(r.created_at || '').slice(11,16) || '—'}</td><td><b>${esc(studentName(r.student_id))}</b></td>
+      <td><span class="tag ${r.mode}">${MODES[r.mode].name}</span></td><td class="num"><b>${fmtVal(r.mode, r.value)}</b></td>
+      <td>${r.time_limit ? fmtClock(r.time_limit) : '—'}</td><td>${esc(r.note)}</td></tr>`).join('')}</table></div>`
+    : '<div class="empty">這個模式這天還沒有紀錄</div>';
+  drawFeedStatus();
+}
+function drawFeedStatus(){
+  if (API.demo) { $('#feedStatus').textContent = '示範模式：不會自動更新'; return; }
+  if (API.offline) { $('#feedStatus').textContent = '📴 離線中，無法更新'; return; }
+  const t = Feed.last ? `${pad(Feed.last.getHours())}:${pad(Feed.last.getMinutes())}:${pad(Feed.last.getSeconds())}` : '—';
+  $('#feedStatus').textContent = `每 10 秒自動更新・最後更新 ${t}`;
+}
+/* 只抓最近一天以後的紀錄，兩個場地的手機登記後，大約 10 秒內就會出現在對方畫面上 */
+async function pollFeed(){
+  if (API.demo || API.offline || document.hidden) return;
   try {
-    await API.req('POST','records', {student_id:+sid, date:$('#recDate').value || today(), mode:m, value:+v,
-      time_limit: MODES[m].timed ? limitSec() : null, note:$('#recNote').value});
-    await reload();
-    const best = Math.max(...S.records.filter(r => r.student_id===+sid && r.mode===m && (m==='keeper' || r.time_limit===limitSec())).map(r => r.value));
-    toast(+v >= best ? '🎉 已儲存，這是你的個人最佳紀錄！' : '✅ 已儲存');
-    $('#recValue').value = ''; $('#recNote').value = '';
-    MODES[m].timed ? resetCount() : resetSw();
-    renderToday();
-  } catch (e) { toast(e.message, true); }
-  $('#recSave').disabled = false;
-};
-
-function renderToday(){
-  const sid = +$('#recStudent').value, d = $('#recDate').value;
-  $('#todayWho').textContent = sid ? `— ${studentName(sid)}，${d}` : '';
-  if (!sid) { $('#todayList').innerHTML = '<div class="empty">先選擇學生</div>'; return; }
-  const rs = S.records.filter(r => r.student_id===sid && r.date===d).reverse();
-  if (!rs.length) { $('#todayList').innerHTML = '<div class="empty">這天還沒有紀錄，開始練習吧！</div>'; return; }
-  $('#todayList').innerHTML = `<div class="tablewrap"><table><tr><th>模式</th><th class="num">成績</th><th>限時</th><th>備註</th></tr>${
-    rs.map(r => `<tr><td><span class="tag ${r.mode}">${MODES[r.mode].name}</span></td><td class="num"><b>${fmtVal(r.mode,r.value)}</b></td><td>${r.time_limit?fmtClock(r.time_limit):'—'}</td><td>${esc(r.note)}</td></tr>`).join('')
-  }</table></div>`;
+    const from = feedDay() || today();
+    const [studs, rs] = await Promise.all([API.req('GET','students'), API.req('GET','records?from=' + from)]);
+    rs.forEach(r => { r.value = +r.value; r.time_limit = r.time_limit ? +r.time_limit : null; });
+    const changedStudents = JSON.stringify(studs) !== JSON.stringify(S.students);
+    S.students = studs;
+    S.records = S.records.filter(r => r.date < from).concat(rs);
+    Feed.last = new Date();
+    if (changedStudents) { fillStudentSelects(); }
+    if (S.tab === 'record') { renderFeed(); TIMERS.forEach(t => t.drawMine()); } else drawFeedStatus();
+  } catch { $('#feedStatus').textContent = '⚠️ 暫時連不上伺服器，稍後會再試'; }
 }
+function startFeed(){
+  Feed.last = new Date(); renderFeed();
+  clearInterval(Feed.iv); Feed.iv = setInterval(pollFeed, 10000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pollFeed(); });
+}
+$('#feedRefresh').onclick = async () => { if (API.demo) { renderFeed(); return; } await pollFeed(); toast('已更新'); };
 
 /* ================= 統計工具 ================= */
 function inRange(r, range){ return range==='all' || r.date >= daysAgo(+range - 1); }
@@ -696,10 +804,9 @@ const noChart = () => typeof Chart === 'undefined';
 /* ================= 我的進步 ================= */
 seg($('#pgRange'), RANGES, S.pgRange, v => { S.pgRange = v; renderProgress(); });
 seg($('#pgUnit'), [['raw','原始次數'],['rate','換算每分鐘']], S.pgUnit, v => { S.pgUnit = v; renderProgress(); });
-$('#pgStudent').onchange = e => { store.set('me', e.target.value); renderProgress(); };
 
 function renderProgress(){
-  const sid = +$('#pgStudent').value, box = $('#pgCards');
+  const sid = S.pgSid, box = $('#pgCards');
   Object.keys(S.charts).filter(k => k.startsWith('pg')).forEach(kill);
   if (!sid) { box.innerHTML = '<div class="card empty">還沒有學生，請老師先到「管理」新增學生。</div>'; return; }
   box.innerHTML = Object.entries(MODES).map(([k,M]) => `
@@ -752,12 +859,12 @@ seg($('#cmpMode'), Object.entries(MODES).map(([k,m]) => [k,m.name]), S.cmpMode, 
 seg($('#cmpRange'), RANGES, S.cmpRange, v => { S.cmpRange = v; renderCompare(); });
 seg($('#cmpMetric'), [['best','最佳'],['avg','平均'],['latest','最近一次'],['change','進步幅度']], S.cmpMetric, v => { S.cmpMetric = v; renderCompare(); });
 seg($('#cmpUnit'), [['raw','原始次數'],['rate','每分鐘']], S.cmpUnit, v => { S.cmpUnit = v; renderCompare(); });
-['#cmpRole','#cmpTeam','#cmpMe'].forEach(s => $(s).onchange = renderCompare);
+['#cmpRole','#cmpTeam'].forEach(s => $(s).onchange = renderCompare);
 
 function renderCompare(){
   const k = S.cmpMode, M = MODES[k], unit = k==='keeper' ? 'raw' : S.cmpUnit, metric = S.cmpMetric;
   $('#cmpUnitWrap').classList.toggle('hidden', k==='keeper');
-  const role = $('#cmpRole').value, team = $('#cmpTeam').value, me = +$('#cmpMe').value;
+  const role = $('#cmpRole').value, team = $('#cmpTeam').value, me = S.cmpMe;
   const studs = activeStudents().filter(s => (!role || s.role===role) && (!team || s.team===team));
   const rows = studs.map((s,i) => ({ s, color: SERIES[S.students.indexOf(s) % SERIES.length],
       rs: S.records.filter(r => r.student_id===s.id && r.mode===k && inRange(r,S.cmpRange)) }))
@@ -812,7 +919,7 @@ async function unlock(pin){
 }
 $('#pinBtn').onclick = async () => { if (!await unlock($('#pinInput').value)) toast('密碼錯誤' + (API.demo ? '（示範模式密碼：1234）' : ''), true); };
 $('#pinInput').onkeydown = e => { if (e.key==='Enter') $('#pinBtn').click(); };
-['#rlStudent','#rlMode'].forEach(s => $(s).onchange = renderManage);
+$('#rlMode').onchange = renderManage;
 
 function renderManage(){
   if ($('#adminArea').classList.contains('hidden')) return;
@@ -828,7 +935,7 @@ function renderManage(){
       <td><button class="btn danger small" data-act="del">刪除</button></td></tr>`).join('')}</table>
     <p class="muted">直接修改姓名／隊伍／位置會自動儲存。學生畢業或退出可按「在籍」改成停用，資料會保留但不會出現在選單與排行。</p>`
     : '<div class="empty">還沒有學生</div>';
-  const sid = +$('#rlStudent').value, md = $('#rlMode').value;
+  const sid = S.rlSid, md = $('#rlMode').value;
   const rs = S.records.filter(r => (!sid || r.student_id===sid) && (!md || r.mode===md)).slice().reverse();
   $('#rlTable').innerHTML = rs.length ? `<p class="muted" style="margin-top:0">共 ${rs.length} 筆${rs.length>200?'，顯示最新 200 筆':''}</p><table><tr><th>日期</th><th>學生</th><th>模式</th><th class="num">成績</th><th>限時</th><th>備註</th><th></th></tr>${
     rs.slice(0,200).map(r => `<tr><td>${r.date}</td><td>${esc(studentName(r.student_id))}</td><td><span class="tag ${r.mode}">${MODES[r.mode].name}</span></td>
@@ -897,7 +1004,8 @@ window.addEventListener('online', () => { if (API.offline) location.reload(); })
   if (API.offline) $('#offlineBanner').classList.remove('hidden');
   setupApp();
   try { await reload(); } catch (e) { toast('讀取資料失敗：' + e.message, true); }
-  setRecMode(S.recMode);
+  initTimers();
+  startFeed();
   if (API.pin) await unlock(API.pin);
   if (noChart()) toast('圖表元件載入失敗，請確認網路連線', true);
   const h = location.hash.slice(1);
